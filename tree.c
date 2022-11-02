@@ -1,5 +1,6 @@
+#include "structures.h"
 #include "tree.h"
-#include <string.h>
+
 
 void create_trees()
 {
