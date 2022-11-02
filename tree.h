@@ -8,3 +8,6 @@ typedef struct s_tree{
     t_ht_list roots;
 
 } t_tree;
+
+
+void create_trees();
