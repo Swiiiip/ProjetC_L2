@@ -43,9 +43,11 @@ typedef t_node *p_node;
 //and each node points its self to another t_ht_list to make a tree 
 //and cover all possible words of the dictionnary
 
-
 //The structure that contains the tree of words for a given word type
 typedef struct s_tree 
 {
     t_ht_list_node roots; //The roots are the first letters of the words
 }t_tree;
+
+
+void create_trees();

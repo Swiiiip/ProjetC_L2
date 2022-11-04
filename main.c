@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "tree.h"
+#include "functions.h"
 
 int main()
 {
-    printf("Hello world!");
+    printf("Hello world!\n");
     create_trees();
+
     return 0;
 }
-

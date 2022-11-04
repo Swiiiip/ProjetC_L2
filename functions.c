@@ -1,6 +1,6 @@
 #include "functions.h"
 
-/*
+
 p_node create_node(char letter)
 {
     p_node mynode;
@@ -9,10 +9,8 @@ p_node create_node(char letter)
     return mynode;
 }
 
-*/
 void add_word(t_tree mytree, char *fbase, char *fflechie, char *personality)
 {
-    /*
     
     p_node current_node, temp_node;
     
@@ -41,7 +39,7 @@ void add_word(t_tree mytree, char *fbase, char *fflechie, char *personality)
     {
         current_node = create_node(fbase[char_index]);
 
-    }*/
+    }
 }
 
 
