@@ -2,8 +2,8 @@
 
 void create_trees()
 {
-  
-  //Creation of the empty trees and initialisation of their fields
+
+    //Creation of the empty trees and initialisation of their fields
     t_tree noun_tree, adj_tree, adv_tree, verb_tree;
     noun_tree.roots.head = noun_tree.roots.tail = adj_tree.roots.head = adj_tree.roots.tail = NULL;
     adv_tree.roots.head = adv_tree.roots.tail = verb_tree.roots.head = verb_tree.roots.tail = NULL;
@@ -15,7 +15,7 @@ void create_trees()
     FILE *dictionary;
     int index_line, index_string;
 
-    dictionary = fopen("dictionnaire.txt","r");
+    dictionary = fopen("test.txt","r");
     
     //We get each line one by one as a string
     while(fgets(line,100,dictionary))
@@ -25,9 +25,9 @@ void create_trees()
         //We add to f_flechie its correct content which is until the first space
         while(line[index_line]!='\t')
         {
-            f_flechie[index_string] = line[index_line]; //The string f_flechie gets completed with an independant counter to the while loop
-            index_line ++;
-            index_string ++;
+            f_flechie[index_string] = line[index_line];
+            index_line++;
+            index_string++;
         }
         f_flechie[index_string+1] = '\0';
 
@@ -35,7 +35,7 @@ void create_trees()
         index_string = 0;
         while(line[index_line]!='\t')
         {
-            f_base[index_string] = line[index_line]; //The string f_base gets completed with an independant counter to the while loop
+            f_base[index_string] = line[index_line+1]; //The string f_base gets completed with an independant counter to the while loop
             index_line ++;
             index_string ++;
         }
@@ -45,7 +45,7 @@ void create_trees()
         index_string = 0;
         while(line[index_line]!=':')
         {
-            type[index_string] = line[index_line]; //The string type gets completed with an independant counter to the while loop
+            type[index_string] = line[index_line+1]; //The string type gets completed with an independant counter to the while loop
             index_line ++;
             index_string ++;
         }
@@ -55,13 +55,13 @@ void create_trees()
         index_string = 0;
         while(line[index_line]!='\0')
         {
-            personality[index_string] = line[index_line]; //The string personality gets completed with an independant counter to the while loop
+            personality[index_string] = line[index_line+1]; //The string personality gets completed with an independant counter to the while loop
             index_line ++;
             index_string ++;
         }
         personality[index_string+1] = '\0';
 
-
+        printf("\n%s %s %s %s\n", f_flechie, f_base, type, personality);
         //Now that we have each information of a line into the correct variables, we add it to the correct tree
         char types[4][4] = {"Nom\0","Adj\0","Adv\0","Ver\0"};
         int found = -1;
