@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include "tree.h"
 
-
-int main(){
-    
+int main()
+{
     printf("Hello world!");
-
+    create_trees();
     return 0;
 }
+
