@@ -6,6 +6,7 @@
 struct s_node; 
 struct s_ht_list_flechie;
 
+
 typedef struct s_cell
 {
     int number_type;// The number that determines the type of the word (Mas, Fem, Sg, Pl...)
@@ -50,5 +51,9 @@ typedef struct s_tree
     t_ht_list_node roots; //The roots are the first letters of the words
 }t_tree;
 
+//void add_word(t_tree mytree, char *fbase, char *fflechie, char *personality);
 
+
+p_node create_node(char letter);
 void create_trees();
+void add_word(t_tree mytree, char *fbase, char *fflechie, char *personality);

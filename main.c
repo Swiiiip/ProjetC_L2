@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "functions.h"
+#include "structures.h"
 
 int main()
 {
-    printf("Hello world!\n");
+    printf("Hello!\n");
     create_trees();
 
     return 0;

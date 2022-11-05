@@ -1,5 +1,47 @@
 #include "structures.h"
 
+p_node create_node(char letter)
+{
+    p_node mynode;
+    mynode->letter = letter;
+    //Missing 
+    return mynode;
+}
+
+void add_word(t_tree mytree, char *fbase, char *fflechie, char *personality)
+{
+    
+    p_node current_node, temp_node;
+    
+    mytree.roots.size +=1;
+
+    if(mytree.roots.head == NULL)
+    {
+        current_node = create_node(fbase[0]);
+        mytree.roots.head = current_node;
+        current_node->next = NULL;
+    }
+    else
+    {
+        temp_node = mytree.roots.head;
+        while(temp_node->next != NULL || temp_node->next->letter != fbase[0]) //not good condition a retravailler
+        {
+            temp_node = temp_node->next;
+        }
+        current_node->next = temp_node->next;
+        temp_node->next = current_node;
+    }
+
+            //NEED RECURSION BAD EVERYTHING
+    int char_index = 1;
+    while(fbase[char_index] != '\0')
+    {
+        current_node = create_node(fbase[char_index]);
+
+    }
+}
+
+
 void create_trees()
 {
 
@@ -15,11 +57,12 @@ void create_trees()
     FILE *dictionary;
     int index_line, index_string;
 
-    dictionary = fopen("test.txt","r");
+    dictionary = fopen("minidictionnary.txt","r");
     
     //We get each line one by one as a string
-    while(fgets(line,100,dictionary))
+    while(fgets(line,110,dictionary))
     {
+        puts(line);
         index_line = index_string = 0;
 
         //We add to f_flechie its correct content which is until the first space
@@ -29,7 +72,9 @@ void create_trees()
             index_line++;
             index_string++;
         }
-        f_flechie[index_string+1] = '\0';
+        f_flechie[index_string] = '\0';
+        puts(f_flechie);
+    
 
         //We add to f_base its correct content which is from the precedent index to the second space
         index_string = 0;
@@ -39,7 +84,8 @@ void create_trees()
             index_line ++;
             index_string ++;
         }
-        f_base[index_string+1] = '\0';
+        f_base[index_string] = '\0';
+        puts(f_base);
 
         //We add to type its correct content which is from the precedent index to the colon
         index_string = 0;
@@ -49,7 +95,8 @@ void create_trees()
             index_line ++;
             index_string ++;
         }
-        type[index_string+1] = '\0';
+        type[index_string] = '\0';
+        puts(type);
 
         //We add to f_base its correct content which is from the precedent index to the end
         index_string = 0;
@@ -59,9 +106,10 @@ void create_trees()
             index_line ++;
             index_string ++;
         }
-        personality[index_string+1] = '\0';
+        personality[index_string] = '\0';
+        puts(personality);
 
-        printf("\n%s %s %s %s\n", f_flechie, f_base, type, personality);
+        //printf("\n%s %s %s %s\n", f_flechie, f_base, type, personality);
         //Now that we have each information of a line into the correct variables, we add it to the correct tree
         char types[4][4] = {"Nom\0","Adj\0","Adv\0","Ver\0"};
         int found = -1;

@@ -1,1 +1,8 @@
-{"code-runner.executorMap": {"c": "gcc *.c -o $fileNameWithoutExt.exe"}}
+{
+    "code-runner.executorMap": {
+        "c": "gcc *.c -o $fileNameWithoutExt.exe"
+    },
+    "files.associations": {
+        "stdio.h": "c"
+    }
+}
