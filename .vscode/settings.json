@@ -1,6 +1,6 @@
 {
     "code-runner.executorMap": {
-        "c": "gcc *.c -o $fileNameWithoutExt.exe"
+        "c": "gcc *.c -o $fileNameWithoutExt.exe && ./$fileNameWithoutExt.exe" 
     },
     "files.associations": {
         "stdio.h": "c"

@@ -74,44 +74,48 @@ void create_trees()
         }
         f_flechie[index_string] = '\0';
         puts(f_flechie);
+        index_line++;
     
 
         //We add to f_base its correct content which is from the precedent index to the second space
         index_string = 0;
         while(line[index_line]!='\t')
         {
-            f_base[index_string] = line[index_line+1]; //The string f_base gets completed with an independant counter to the while loop
+            f_base[index_string] = line[index_line]; //The string f_base gets completed with an independant counter to the while loop
             index_line ++;
             index_string ++;
         }
         f_base[index_string] = '\0';
         puts(f_base);
+        index_line++;
 
         //We add to type its correct content which is from the precedent index to the colon
         index_string = 0;
         while(line[index_line]!=':')
         {
-            type[index_string] = line[index_line+1]; //The string type gets completed with an independant counter to the while loop
+            type[index_string] = line[index_line]; //The string type gets completed with an independant counter to the while loop
             index_line ++;
             index_string ++;
         }
         type[index_string] = '\0';
         puts(type);
+        index_line++;
 
         //We add to f_base its correct content which is from the precedent index to the end
         index_string = 0;
         while(line[index_line]!='\0')
         {
-            personality[index_string] = line[index_line+1]; //The string personality gets completed with an independant counter to the while loop
+            personality[index_string] = line[index_line]; //The string personality gets completed with an independant counter to the while loop
             index_line ++;
             index_string ++;
         }
         personality[index_string] = '\0';
         puts(personality);
+        
 
         //printf("\n%s %s %s %s\n", f_flechie, f_base, type, personality);
         //Now that we have each information of a line into the correct variables, we add it to the correct tree
-        char types[4][4] = {"Nom\0","Adj\0","Adv\0","Ver\0"};
+        /*char types[4][4] = {"Nom\0","Adj\0","Adv\0","Ver\0"};
         int found = -1;
         for(int i = 0 ; i < 4 ; i++)
         {
@@ -142,5 +146,6 @@ void create_trees()
             default :
                 break;
         }
+        */
     }
 }
