@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // Using forward declaration to avoid circular dependencies
 struct s_node; 
