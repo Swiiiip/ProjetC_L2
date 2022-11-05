@@ -1,5 +1,1 @@
-{
-    "files.associations": {
-        "string.h": "c"
-    }
-}
+{"code-runner.executorMap": {"c": "gcc *.c -o $fileNameWithoutExt.exe"}}
