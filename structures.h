@@ -57,3 +57,4 @@ typedef struct s_tree
 p_node create_node(char letter);
 void create_trees();
 void add_word(t_tree mytree, char *fbase, char *fflechie, char *personality);
+

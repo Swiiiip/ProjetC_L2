@@ -1,4 +1,6 @@
 #include "structures.h"
+#include "functions.h"
+#include <stdlib.h>
 
 p_node create_node(char letter)
 {
@@ -42,6 +44,7 @@ void add_word(t_tree mytree, char *fbase, char *fflechie, char *personality)
 }
 
 
+
 void create_trees()
 {
 
@@ -53,19 +56,36 @@ void create_trees()
     
 
     //Reading of the file line by line
-    char line[110], f_flechie[20], f_base[20], type[3], personality[60];
+    char line[110];
+    char* f_flechie, *f_base, *type, *personality;
     FILE *dictionary;
-    int index_line, index_string;
+    int index_line;
 
     dictionary = fopen("minidictionnary.txt","r");
     
     //We get each line one by one as a string
     while(fgets(line,110,dictionary))
     {
-        puts(line);
-        index_line = index_string = 0;
 
+        puts(line);
+        index_line = 0;
+        int temp;
+
+        //We get the first sub_line which is the forme flechie of the word
+        f_flechie = create_sub_lines(line, '\t', &index_line);
+        puts(f_flechie);
+        f_base = create_sub_lines(line, '\t', &index_line);
+        puts(f_base);
+        type = create_sub_lines(line, ':', &index_line);
+        puts(type);
+        personality = create_sub_lines(line, '\0', &index_line);
+        puts(personality);
+
+
+
+        
         //We add to f_flechie its correct content which is until the first space
+        /*
         while(line[index_line]!='\t')
         {
             f_flechie[index_string] = line[index_line];
@@ -74,7 +94,7 @@ void create_trees()
         }
         f_flechie[index_string] = '\0';
         puts(f_flechie);
-        index_line++;
+        index_line++;// to move over from the character "tab" or "\t", for it to not be taken it consideration in the next while loop
     
 
         //We add to f_base its correct content which is from the precedent index to the second space
@@ -111,6 +131,8 @@ void create_trees()
         }
         personality[index_string] = '\0';
         puts(personality);
+        */
+        
         
 
         //printf("\n%s %s %s %s\n", f_flechie, f_base, type, personality);

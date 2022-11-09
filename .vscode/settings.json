@@ -3,6 +3,7 @@
         "c": "gcc *.c -o $fileNameWithoutExt.exe && ./$fileNameWithoutExt.exe" 
     },
     "files.associations": {
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "structures.h": "c"
     }
 }
