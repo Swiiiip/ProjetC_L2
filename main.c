@@ -1,9 +1,12 @@
 #include "structures.h"
 
+
+
 int main()
 {
     printf("Hello!\n");
-    create_trees();
+    fill_trees();
+    
 
     return 0;
 }

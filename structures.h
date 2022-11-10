@@ -35,7 +35,7 @@ typedef struct s_node
 {
     char letter; // The letter on the node
     t_ht_list_node next_letters; // The next level of letters of the word
-    struct s_node  *next, *prev; // Pointer to the next and previous nodes of the list, the letters of the same level
+    struct s_node  *next; // Pointer to the next and previous nodes of the list, the letters of the same level
     t_ht_list_flechie fflechies; // The structure that stores the "formes flechies" and the integer that determines their type (Mas, Fem, Sg, Pl...)
 }t_node;
 
@@ -51,10 +51,13 @@ typedef struct s_tree
     t_ht_list_node roots; //The roots are the first letters of the words
 }t_tree;
 
-//void add_word(t_tree mytree, char *fbase, char *fflechie, char *personality);
+//void add_word(t_tree mytree, char *fbase, char *fflechie, char *subtype);
 
 
 p_node create_node(char letter);
-void create_trees();
-void add_word(t_tree mytree, char *fbase, char *fflechie, char *personality);
+t_tree create_empty_tree();
+void fill_trees();
+p_node add_letter(t_ht_list_node siblings, p_node my_node,char * f_base, int index);
+void add_word(t_tree mytree, char *fbase, char *fflechie, char *subtype);
+p_node search_letter(t_ht_list_node mylist, char letter);
 

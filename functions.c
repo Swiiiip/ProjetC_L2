@@ -1,7 +1,6 @@
 #include "functions.h"
 
 
-
 char * create_sub_lines(char line[110], char seperator, int * index_line){
 
     
@@ -31,7 +30,6 @@ char * create_sub_lines(char line[110], char seperator, int * index_line){
         }
 
         sub_line[index_string] = '\0';
-        //printf("sub_line: %s\n", sub_line);
         *index_line = *index_line + 1;
 
         return sub_line;

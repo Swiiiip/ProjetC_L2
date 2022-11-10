@@ -6,85 +6,148 @@ p_node create_node(char letter)
 {
     p_node mynode;
     mynode->letter = letter;
-    //Missing 
+    mynode->next = NULL;
+    mynode->fflechies.head = NULL;
+    mynode->fflechies.tail = NULL;
     return mynode;
 }
 
-void add_word(t_tree mytree, char *fbase, char *fflechie, char *personality)
+p_node search_letter(t_ht_list_node siblings, char letter)
 {
-    
-    p_node current_node, temp_node;
-    
-    mytree.roots.size +=1;
 
-    if(mytree.roots.head == NULL)
+    p_node temp = siblings.head;
+    while(temp != NULL)
     {
-        current_node = create_node(fbase[0]);
-        mytree.roots.head = current_node;
-        current_node->next = NULL;
+        if(temp->letter == letter)
+            return temp;
+        temp = temp->next;
     }
-    else
-    {
-        temp_node = mytree.roots.head;
-        while(temp_node->next != NULL || temp_node->next->letter != fbase[0]) //not good condition a retravailler
+    return NULL;
+}
+
+p_node add_letter(t_ht_list_node siblings, p_node my_node, char * f_base, int index)
+{
+
+
+    if(f_base[index+1] != '\0'){
+
+        if (siblings.head == NULL)
         {
-            temp_node = temp_node->next;
+            p_node new_node = create_node(f_base[index]);        
+            siblings.head = new_node;
+            siblings.tail = new_node;
+            siblings.size = 1;
+            return add_letter(new_node->next_letters, new_node, f_base, index+1);
         }
-        current_node->next = temp_node->next;
-        temp_node->next = current_node;
-    }
+        else
+        {
+            p_node temp = search_letter(siblings, f_base[index]);
+            if(temp == NULL)
+            {
+                p_node new_node = create_node(f_base[index]);
+                siblings.tail->next = new_node;
+                siblings.tail = new_node;
+                siblings.size ++;
+                return add_letter(new_node->next_letters, new_node, f_base, index+1);
+            }else{
+                return add_letter(temp->next_letters, temp, f_base, index+1);
+            }
 
-            //NEED RECURSION BAD EVERYTHING
-    int char_index = 1;
-    while(fbase[char_index] != '\0')
-    {
-        current_node = create_node(fbase[char_index]);
-
+        }
+    }else{
+        return my_node;
     }
 }
 
-
-
-void create_trees()
+void add_word(t_tree mytree, char *fbase, char *fflechie, char *subtype)
 {
-
-    //Creation of the empty trees and initialisation of their fields
-    t_tree noun_tree, adj_tree, adv_tree, verb_tree;
-    noun_tree.roots.head = noun_tree.roots.tail = adj_tree.roots.head = adj_tree.roots.tail = NULL;
-    adv_tree.roots.head = adv_tree.roots.tail = verb_tree.roots.head = verb_tree.roots.tail = NULL;
-    noun_tree.roots.size = adj_tree.roots.size = adv_tree.roots.size = verb_tree.roots.size = 0;
+    p_node my_node = add_letter(mytree.roots, NULL, fbase, 0);
     
+    //Add the forme flechie to the list of the last node
+    my_node->next_letters.head = NULL;
+    my_node->next_letters.tail = NULL;
+    my_node->next_letters.size = 0;
+    
+}
+
+t_tree create_empty_tree()
+{
+    t_tree mytree;
+    mytree.roots.head = NULL;
+    mytree.roots.tail = NULL;
+    mytree.roots.size = 0;
+}
+
+void fill_trees()
+{
+    //Creation of the empty trees and initialisation of their fields
+    t_tree noun_tree = create_empty_tree();
+    t_tree verb_tree = create_empty_tree();
+    t_tree adj_tree = create_empty_tree();
+    t_tree adv_tree = create_empty_tree();
+
 
     //Reading of the file line by line
     char line[110];
-    char* f_flechie, *f_base, *type, *personality;
+    char* f_flechie, *f_base, *category, *subtype;
     FILE *dictionary;
     int index_line;
 
+    //Opening of the file
     dictionary = fopen("minidictionnary.txt","r");
     
-    //We get each line one by one as a string
+    //The while returns each line one by one as a string, line 
     while(fgets(line,110,dictionary))
     {
 
-        puts(line);
         index_line = 0;
-        int temp;
-
-        //We get the first sub_line which is the forme flechie of the word
+        //By using the create_sub_lines function, we cut up the different parts of the line into strings(f_flechie, f_base, category, subtype)
         f_flechie = create_sub_lines(line, '\t', &index_line);
-        puts(f_flechie);
         f_base = create_sub_lines(line, '\t', &index_line);
-        puts(f_base);
-        type = create_sub_lines(line, ':', &index_line);
-        puts(type);
-        personality = create_sub_lines(line, '\0', &index_line);
-        puts(personality);
+        category = create_sub_lines(line, ':', &index_line);
+        subtype = create_sub_lines(line, '\0', &index_line);
 
 
-
+        //Now that we have each information of a line into the correct variables, we add it to the correct tree
+        char categories[4][4] = {"Nom\0","Adj\0","Adv\0","Ver\0"};
+        int found = -1;
+        for(int i = 0 ; i < 4 ; i++)
+        {
+            if (!strcmp(categories[i],category))//Looks if the category we have is among the four we consider
+            {
+                found = i;
+    
+            }
+        }
+    
+         
+        switch(found)
+        {
+            case 0:
+                //Functions to add the line in the noun_tree
+                add_word(noun_tree, f_base, f_flechie, subtype);
+                break;
+            case 1:
+                //Functions to add the line in the adj_tree
+                add_word(adj_tree, f_base, f_flechie, subtype);
+                break;
+            case 2:
+                //Functions to add the line in the adv_tree
+                add_word(adv_tree, f_base, f_flechie, subtype);
+                break;
+            case 3:
+                //Functions to add the line in the ver_tree
+                add_word(verb_tree, f_base, f_flechie, subtype);
+                break;
+            default :
+                break;
+        }
         
-        //We add to f_flechie its correct content which is until the first space
+        
+    }
+}
+
+//We add to f_flechie its correct content which is until the first space
         /*
         while(line[index_line]!='\t')
         {
@@ -109,65 +172,26 @@ void create_trees()
         puts(f_base);
         index_line++;
 
-        //We add to type its correct content which is from the precedent index to the colon
+        //We add to category its correct content which is from the precedent index to the colon
         index_string = 0;
         while(line[index_line]!=':')
         {
-            type[index_string] = line[index_line]; //The string type gets completed with an independant counter to the while loop
+            category[index_string] = line[index_line]; //The string category gets completed with an independant counter to the while loop
             index_line ++;
             index_string ++;
         }
-        type[index_string] = '\0';
-        puts(type);
+        category[index_string] = '\0';
+        puts(category);
         index_line++;
 
         //We add to f_base its correct content which is from the precedent index to the end
         index_string = 0;
         while(line[index_line]!='\0')
         {
-            personality[index_string] = line[index_line]; //The string personality gets completed with an independant counter to the while loop
+            subtype[index_string] = line[index_line]; //The string subtype gets completed with an independant counter to the while loop
             index_line ++;
             index_string ++;
         }
-        personality[index_string] = '\0';
-        puts(personality);
+        subtype[index_string] = '\0';
+        puts(subtype);
         */
-        
-        
-
-        //printf("\n%s %s %s %s\n", f_flechie, f_base, type, personality);
-        //Now that we have each information of a line into the correct variables, we add it to the correct tree
-        /*char types[4][4] = {"Nom\0","Adj\0","Adv\0","Ver\0"};
-        int found = -1;
-        for(int i = 0 ; i < 4 ; i++)
-        {
-            if (!strcmp(types[i],type))//Looks if the type we have is among the four we consider
-            {
-                found = i;
-            }
-        }
-         
-        switch(found)
-        {
-            case 0:
-                //Functions to add the line in the noun_tree
-                add_word(noun_tree, f_base, f_flechie, personality);
-                break;
-            case 1:
-                //Functions to add the line in the adj_tree
-                add_word(adj_tree, f_base, f_flechie, personality);
-                break;
-            case 2:
-                //Functions to add the line in the adv_tree
-                add_word(adv_tree, f_base, f_flechie, personality);
-                break;
-            case 3:
-                //Functions to add the line in the ver_tree
-                add_word(verb_tree, f_base, f_flechie, personality);
-                break;
-            default :
-                break;
-        }
-        */
-    }
-}
