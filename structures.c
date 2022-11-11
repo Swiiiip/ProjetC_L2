@@ -28,7 +28,7 @@ p_node search_letter(t_ht_list_node siblings, char letter)
     return NULL;
 }
 
-p_node add_letters(t_ht_list_node * siblings, p_node my_node,char * f_base, int index)
+p_node add_fbase(t_ht_list_node * siblings, p_node my_node,char * f_base, int index)
 {
     if(f_base[index] == '\0'){
         my_node->next_letters.head = NULL;
@@ -57,65 +57,14 @@ p_node add_letters(t_ht_list_node * siblings, p_node my_node,char * f_base, int 
         }
     }
     printf("%c\n", f_base[index]);
-    add_letters(&(temp->next_letters), temp, f_base, index + 1);
+    add_fbase(&(temp->next_letters), temp, f_base, index + 1);
 }
-
-/*p_node add_letter(t_ht_list_node siblings, p_node my_node, char * f_base, int index)
-{
-    printf("siblings.head = %p\n", siblings.head);
-    if (siblings.head != NULL)
-    {
-        printf("coucou");
-        //printf("first letter \n%c ",siblings->head->letter);
-    }
-
-    if(f_base[index] != '\0'){
-        if (siblings.head == NULL)
-        {            
-            printf("case 1\n");
-            p_node new_node = create_node(f_base[index]);
-            siblings.head = new_node;
-            siblings.tail = new_node;
-            siblings.size = 1;
-            printf("%c \n",new_node->letter);
-            printf("in add letter%p\n",siblings.head);
-            return add_letter(siblings, new_node, f_base, index+1);
-
-            //return add_letter(siblings.head->next_letters, new_node, f_base, index+1);
-        }
-        else
-        {
-            printf("coucou1234341");
-            p_node found = search_letter(siblings, f_base[index]);
-            printf("coucou2\n");
-            if(found == NULL)
-            {
-                printf("case 2\n");
-                p_node new_node = create_node(f_base[index]);
-                siblings.tail->next = new_node;
-                siblings.tail = new_node;
-                siblings.size ++;
-                printf("%c \n",new_node->letter);
-                return add_letter(siblings.next_, new_node, f_base, index+1);
-                //return add_letter(new_node->next_letters, new_node, f_base, index+1);
-            }else{
-                printf("case 3\n");
-                printf("%c \n",found->letter);
-                return add_letter(siblings, found, f_base, index+1);
-                //return add_letter(found->next_letters, found, f_base, index+1);
-            }
-        }
-    }else{
-        return my_node;
-    }
-}
-*/
 
 void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *subtype)
 {
     //mytree.roots.head = NULL;
     printf("before add letter%p\n",the_root->head);
-    p_node my_node = add_letters(the_root, NULL, fbase, 0);
+    p_node my_node = add_fbase(the_root, NULL, fbase, 0);
     printf("after add letter%p\n", the_root->head);
     //Add the forme flechie to the list of the last node
 
@@ -128,24 +77,17 @@ t_tree create_empty_tree()
     mytree.roots.head = NULL;
     mytree.roots.tail = NULL;
     mytree.roots.size = 0;
-    printf("%u\n",mytree.roots.head);
+    return mytree;
 
 }
 
 void fill_trees()
 {
     //Creation of the empty trees and initialisation of their fields
-    /*
     t_tree noun_tree = create_empty_tree();
     t_tree verb_tree = create_empty_tree();
     t_tree adj_tree = create_empty_tree();
     t_tree adv_tree = create_empty_tree();
-    */
-    t_tree noun_tree, verb_tree, adj_tree,adv_tree;
-    verb_tree.roots.head = noun_tree.roots.head = adj_tree.roots.head = adv_tree.roots.head = NULL;
-    verb_tree.roots.tail = noun_tree.roots.tail = adj_tree.roots.tail = adv_tree.roots.tail = NULL;
-    verb_tree.roots.size = noun_tree.roots.size = adj_tree.roots.size = adv_tree.roots.size = 0;
-    printf("initialisation adress :%p \n",verb_tree.roots.head);
 
 
     //Reading of the file line by line
@@ -185,22 +127,18 @@ void fill_trees()
         {
             case 0:
                 //Functions to add the line in the noun_tree
-                //noun_tree.roots.head = add_word(noun_tree.roots.head, f_base, f_flechie, subtype);
                 add_word(&(noun_tree.roots), f_base, f_flechie, subtype);
                 break;
             case 1:
                 //Functions to add the line in the adj_tree
-                //adj_tree.roots.head = add_word(adj_tree.roots.head, f_base, f_flechie, subtype);
                 add_word(&(adj_tree.roots), f_base, f_flechie, subtype);
                 break;
             case 2:
                 //Functions to add the line in the adv_tree
-                //adv_tree.roots.head = add_word(adv_tree.roots.head, f_base, f_flechie, subtype);
                 add_word(&(adv_tree.roots), f_base, f_flechie, subtype);
                 break;
             case 3:
                 //Functions to add the line in the ver_tree
-                //verb_tree.roots.head =add_word(verb_tree.roots.head, f_base, f_flechie, subtype);
                 add_word(&(verb_tree.roots), f_base, f_flechie, subtype);
                 break;
             default :
