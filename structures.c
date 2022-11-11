@@ -62,10 +62,7 @@ p_node add_fbase(t_ht_list_node * siblings, p_node my_node,char * f_base, int in
 
 void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *subtype)
 {
-    //mytree.roots.head = NULL;
-    //printf("before add letter%p\n",the_root->head);
     p_node my_node = add_fbase(the_root, NULL, fbase, 0);
-    //printf("after add letter%p\n", the_root->head);
     //Add the forme flechie to the list of the last node
 
     
@@ -97,12 +94,12 @@ void fill_trees()
     int index_line;
 
     //Opening of the file
-    dictionary = fopen("minidictionnary.txt","r");
+    dictionary = fopen("dictionnaire.txt","r");
     
     //The while returns each line one by one as a string, line 
     while(fgets(line,110,dictionary))
     {
-
+        //printf("%s",line);
         index_line = 0;
         //By using the create_sub_lines function, we cut up the different parts of the line into strings(f_flechie, f_base, category, subtype)
         f_flechie = create_sub_lines(line, '\t', &index_line);
@@ -118,7 +115,7 @@ void fill_trees()
         //puts(subtype);
         //printf("\n");
 
-
+        
         //Now that we have each information of a line into the correct variables, we add it to the correct tree
         char categories[4][4] = {"Nom\0","Adj\0","Adv\0","Ver\0"};
         int found = -1;
@@ -152,10 +149,8 @@ void fill_trees()
             default :
                 break;
         }
-        
-        
-        
     }
+    
     printf("noun tree :\n");
     printPaths(noun_tree.roots.head);
     printf("adj tree :\n");
@@ -164,8 +159,10 @@ void fill_trees()
     printPaths(adv_tree.roots.head);
     printf("verb tree :\n");
     printPaths(verb_tree.roots.head);
+    
+   printf("done");
+   fclose(dictionary);
 }
-
 
 
 void printPaths(p_node node)
