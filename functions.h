@@ -4,5 +4,3 @@
 
 
 char* create_sub_lines(char line[110], char seperator, int * index_line);
-
-

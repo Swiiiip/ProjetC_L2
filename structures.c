@@ -2,19 +2,22 @@
 #include "functions.h"
 #include <stdlib.h>
 
-p_node create_node(char letter)
+p_node create_node(char character)
 {
     p_node mynode;
-    mynode->letter = letter;
+    mynode = malloc(sizeof(t_node));
     mynode->next = NULL;
+    mynode->letter = character;
     mynode->fflechies.head = NULL;
     mynode->fflechies.tail = NULL;
+    mynode->next_letters.head = NULL;
+    mynode->next_letters.tail = NULL;
+    mynode->next_letters.size = 0;
     return mynode;
 }
 
 p_node search_letter(t_ht_list_node siblings, char letter)
 {
-
     p_node temp = siblings.head;
     while(temp != NULL)
     {
@@ -27,42 +30,53 @@ p_node search_letter(t_ht_list_node siblings, char letter)
 
 p_node add_letter(t_ht_list_node siblings, p_node my_node, char * f_base, int index)
 {
+    if (siblings.head != NULL)
+    {
+        printf("coucou");
+        //printf("first letter \n%c ",siblings->head->letter);
+    }
 
-
-    if(f_base[index+1] != '\0'){
-
+    if(f_base[index] != '\0'){
         if (siblings.head == NULL)
-        {
-            p_node new_node = create_node(f_base[index]);        
+        {            
+            printf("case 1\n");
+            p_node new_node = create_node(f_base[index]);
             siblings.head = new_node;
             siblings.tail = new_node;
             siblings.size = 1;
-            return add_letter(new_node->next_letters, new_node, f_base, index+1);
+            printf("%c \n",new_node->letter);
+            printf("in add letter%u\n",siblings.head);
+            return add_letter(siblings.head->next_letters, new_node, f_base, index+1);
         }
         else
         {
-            p_node temp = search_letter(siblings, f_base[index]);
-            if(temp == NULL)
+            printf("coucou1234341");
+            p_node found = search_letter(siblings, f_base[index]);
+            printf("coucou2\n");
+            if(found == NULL)
             {
+                printf("case 2\n");
                 p_node new_node = create_node(f_base[index]);
                 siblings.tail->next = new_node;
                 siblings.tail = new_node;
                 siblings.size ++;
                 return add_letter(new_node->next_letters, new_node, f_base, index+1);
             }else{
-                return add_letter(temp->next_letters, temp, f_base, index+1);
+                printf("case 3\n");
+                return add_letter(found->next_letters, found, f_base, index+1);
             }
-
         }
     }else{
         return my_node;
     }
 }
 
-void add_word(t_tree mytree, char *fbase, char *fflechie, char *subtype)
+void add_word(t_tree *mytree, char *fbase, char *fflechie, char *subtype)
 {
-    p_node my_node = add_letter(mytree.roots, NULL, fbase, 0);
-    
+    //mytree.roots.head = NULL;
+    printf("before add letter%u\n",mytree->roots.head);
+    p_node my_node = add_letter(mytree->roots, NULL, fbase, 0);
+    printf("after add letter%u\n",mytree->roots.head);
     //Add the forme flechie to the list of the last node
     my_node->next_letters.head = NULL;
     my_node->next_letters.tail = NULL;
@@ -76,15 +90,24 @@ t_tree create_empty_tree()
     mytree.roots.head = NULL;
     mytree.roots.tail = NULL;
     mytree.roots.size = 0;
+        printf("%u\n",mytree.roots.head);
+
 }
 
 void fill_trees()
 {
     //Creation of the empty trees and initialisation of their fields
+    /*
     t_tree noun_tree = create_empty_tree();
     t_tree verb_tree = create_empty_tree();
     t_tree adj_tree = create_empty_tree();
     t_tree adv_tree = create_empty_tree();
+    */
+    t_tree noun_tree, verb_tree, adj_tree,adv_tree;
+    verb_tree.roots.head = noun_tree.roots.head = adj_tree.roots.head = adv_tree.roots.head = NULL;
+    verb_tree.roots.tail = noun_tree.roots.tail = adj_tree.roots.tail = adv_tree.roots.tail = NULL;
+    verb_tree.roots.size = noun_tree.roots.size = adj_tree.roots.size = adv_tree.roots.size = 0;
+    printf("initialisation adress :%u \n",verb_tree.roots.head);
 
 
     //Reading of the file line by line
@@ -120,78 +143,49 @@ void fill_trees()
             }
         }
     
-         
         switch(found)
         {
             case 0:
                 //Functions to add the line in the noun_tree
-                add_word(noun_tree, f_base, f_flechie, subtype);
+                add_word(&noun_tree, f_base, f_flechie, subtype);
                 break;
             case 1:
                 //Functions to add the line in the adj_tree
-                add_word(adj_tree, f_base, f_flechie, subtype);
+                add_word(&adj_tree, f_base, f_flechie, subtype);
                 break;
             case 2:
                 //Functions to add the line in the adv_tree
-                add_word(adv_tree, f_base, f_flechie, subtype);
+                add_word(&adv_tree, f_base, f_flechie, subtype);
                 break;
             case 3:
                 //Functions to add the line in the ver_tree
-                add_word(verb_tree, f_base, f_flechie, subtype);
+                add_word(&verb_tree, f_base, f_flechie, subtype);
                 break;
             default :
                 break;
         }
+        //display_tree(verb_tree.roots.head,0);
         
         
     }
 }
 
-//We add to f_flechie its correct content which is until the first space
-        /*
-        while(line[index_line]!='\t')
-        {
-            f_flechie[index_string] = line[index_line];
-            index_line++;
-            index_string++;
-        }
-        f_flechie[index_string] = '\0';
-        puts(f_flechie);
-        index_line++;// to move over from the character "tab" or "\t", for it to not be taken it consideration in the next while loop
-    
+void display_tree(p_node root, int index)
+{
+    p_node temp = root;
 
-        //We add to f_base its correct content which is from the precedent index to the second space
-        index_string = 0;
-        while(line[index_line]!='\t')
-        {
-            f_base[index_string] = line[index_line]; //The string f_base gets completed with an independant counter to the while loop
-            index_line ++;
-            index_string ++;
-        }
-        f_base[index_string] = '\0';
-        puts(f_base);
-        index_line++;
+    if(temp->next_letters.head == NULL) return;
 
-        //We add to category its correct content which is from the precedent index to the colon
-        index_string = 0;
-        while(line[index_line]!=':')
+    for(int i = 0; i<index;i++)
         {
-            category[index_string] = line[index_line]; //The string category gets completed with an independant counter to the while loop
-            index_line ++;
-            index_string ++;
+            temp = temp->next;
         }
-        category[index_string] = '\0';
-        puts(category);
-        index_line++;
-
-        //We add to f_base its correct content which is from the precedent index to the end
-        index_string = 0;
-        while(line[index_line]!='\0')
-        {
-            subtype[index_string] = line[index_line]; //The string subtype gets completed with an independant counter to the while loop
-            index_line ++;
-            index_string ++;
-        }
-        subtype[index_string] = '\0';
-        puts(subtype);
-        */
+    while(temp != NULL)
+    {
+        printf("%c",temp->letter);
+        display_tree(temp->next_letters.head,index);
+        temp = temp->next;
+        index+=1;
+    }
+    return;
+}
