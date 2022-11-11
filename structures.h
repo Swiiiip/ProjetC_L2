@@ -57,9 +57,10 @@ typedef struct s_tree
 
 t_tree create_empty_tree();
 void fill_trees();
-p_node add_letter(t_ht_list_node siblings, p_node my_node,char * f_base, int index);
-void add_word(t_tree *mytree, char *fbase, char *fflechie, char *subtype);
-p_node search_letter(t_ht_list_node mylist, char letter);
+p_node add_letter(t_ht_list_node * siblings, p_node my_node,char * f_base, int index);
+void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *subtype);
+//p_node search_letter(t_ht_list_node mylist, char letter);
+p_node add_letters(t_ht_list_node * siblings, p_node my_node, char * f_base, int index);
 
 void display_tree(p_node,int);
 p_node create_node(char letter);
