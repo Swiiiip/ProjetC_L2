@@ -58,6 +58,9 @@ typedef struct s_tree
 t_tree create_empty_tree();
 void fill_trees();
 void display_tree(p_node,int);
+void printPaths(p_node node);
+void printPathsRecur(p_node node, char path[], int pathLen);
+void printArray(char chars[], int len);
 
 //    FUNCTIONS FOR WORDS MANIPULATION    //
 p_node add_fbase(t_ht_list_node * siblings, p_node my_node, char * f_base, int index);

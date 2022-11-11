@@ -43,29 +43,29 @@ p_node add_fbase(t_ht_list_node * siblings, p_node my_node,char * f_base, int in
         temp = create_node(f_base[index]);
         if(siblings->head == NULL)
         {
-            printf("case 1\n");
+            //printf("case 1\n");
             siblings->head = temp;
             siblings->tail = temp;
             siblings->size = 1;
         }
         else
         {
-            printf("case 2\n");
+            //printf("case 2\n");
             siblings->tail->next = temp;
             siblings->tail = temp;
             siblings->size ++;
         }
     }
-    printf("%c\n", f_base[index]);
+    //printf("%c\n", f_base[index]);
     add_fbase(&(temp->next_letters), temp, f_base, index + 1);
 }
 
 void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *subtype)
 {
     //mytree.roots.head = NULL;
-    printf("before add letter%p\n",the_root->head);
+    //printf("before add letter%p\n",the_root->head);
     p_node my_node = add_fbase(the_root, NULL, fbase, 0);
-    printf("after add letter%p\n", the_root->head);
+    //printf("after add letter%p\n", the_root->head);
     //Add the forme flechie to the list of the last node
 
     
@@ -106,9 +106,17 @@ void fill_trees()
         index_line = 0;
         //By using the create_sub_lines function, we cut up the different parts of the line into strings(f_flechie, f_base, category, subtype)
         f_flechie = create_sub_lines(line, '\t', &index_line);
+        //puts(f_flechie);
+        //printf("\n");
         f_base = create_sub_lines(line, '\t', &index_line);
+        //puts(f_base);
+        //printf("\n");
         category = create_sub_lines(line, ':', &index_line);
+        //puts(category);
+        //printf("\n");
         subtype = create_sub_lines(line, '\0', &index_line);
+        //puts(subtype);
+        //printf("\n");
 
 
         //Now that we have each information of a line into the correct variables, we add it to the correct tree
@@ -148,26 +156,57 @@ void fill_trees()
         
         
     }
-
-    //display_tree(verb_tree.roots.head,0);
+    printf("noun tree :\n");
+    printPaths(noun_tree.roots.head);
+    printf("adj tree :\n");
+    printPaths(adj_tree.roots.head);
+    printf("adv tree :\n");
+    printPaths(adv_tree.roots.head);
+    printf("verb tree :\n");
+    printPaths(verb_tree.roots.head);
 }
 
-void display_tree(p_node root, int index)
+
+
+void printPaths(p_node node)
 {
-    p_node temp = root;
+  char path[30];
+  printPathsRecur(node, path, 0);
+}
 
-    if(temp->next_letters.head == NULL) return;
+void printPathsRecur(p_node node, char path[], int pathLen)
+{
+  if (node==NULL)
+    return;
 
-    for(int i = 0; i<index;i++)
-        {
-            temp = temp->next;
-        }
+  /* append this node to the path array */
+  path[pathLen] = node->letter;
+  pathLen++;
+
+  /* it's a leaf, so print the path that led to here  */
+  if (node->next_letters.head == NULL)
+  {
+    printArray(path, pathLen);
+  }
+  else
+  {
+    /* otherwise try both subtrees */
+    p_node temp = node->next_letters.head;
     while(temp != NULL)
     {
-        printf("%c",temp->letter);
-        display_tree(temp->next_letters.head,index);
+        printPathsRecur(temp, path, pathLen);
         temp = temp->next;
-        index+=1;
     }
-    return;
+  }
 }
+
+void printArray(char chars[], int len)
+{
+  int i;
+  for (i=0; i<len; i++)
+  {
+    printf("%c", chars[i]);
+  }
+  printf("\n");
+}
+
