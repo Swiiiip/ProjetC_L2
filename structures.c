@@ -4,15 +4,18 @@
 
 p_node create_node(char character)
 {
-    p_node mynode;
-    mynode = malloc(sizeof(t_node));
+    p_node mynode = malloc(sizeof(t_node));
+    
     mynode->next = NULL;
     mynode->letter = character;
+
     mynode->fflechies.head = NULL;
     mynode->fflechies.tail = NULL;
+
     mynode->next_letters.head = NULL;
     mynode->next_letters.tail = NULL;
     mynode->next_letters.size = 0;
+    
     return mynode;
 }
 
@@ -43,29 +46,103 @@ p_node add_fbase(t_ht_list_node * siblings, p_node my_node,char * f_base, int in
         temp = create_node(f_base[index]);
         if(siblings->head == NULL)
         {
-            //printf("case 1\n");
             siblings->head = temp;
             siblings->tail = temp;
             siblings->size = 1;
         }
         else
         {
-            //printf("case 2\n");
             siblings->tail->next = temp;
             siblings->tail = temp;
             siblings->size ++;
         }
     }
-    //printf("%c\n", f_base[index]);
     add_fbase(&(temp->next_letters), temp, f_base, index + 1);
 }
 
-void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *subtype)
+p_cell add_fflechie(char* fflechie, char* type){
+
+    int type_int = 0;
+    char *subtype, *token = strtok(type, "+");
+    
+    while(token != NULL){
+        subtype = token;
+        token = strtok(NULL, "+");
+            
+        // Binary table for type conversion : 
+        // +--------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+        // |   10   |   9   |   8   |   7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
+        // +--------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+        // |  Inf   | IImp  | IPre  | SPre  |  P1   |  P2   |  P3   |  PL   |  SG   |  Fem  |  Mas  |
+        // +--------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+
+        if(!strcmp(subtype, "InvGen"))
+            type_int += 2 + 1;
+        else{ if(!strcmp(subtype, "Mas"))
+            type_int += 1;
+        else if(!strcmp(subtype, "Fem"))
+            type_int += 2;
+
+        else if(!strcmp(subtype, "InvPL"))
+            type_int += 4 + 8;
+        else if(!strcmp(subtype, "SG"))
+            type_int += 4;
+        else if(!strcmp(subtype, "PL"))
+            type_int += 8;
+
+        else if(!strcmp(subtype, "P3"))
+            type_int += 16;
+        else if(!strcmp(subtype, "P2"))
+            type_int += 32;
+        else if(!strcmp(subtype, "P1"))
+            type_int += 64;
+
+        else if(!strcmp(subtype, "SPre"))
+            type_int += 128;
+        else if(!strcmp(subtype, "IPre"))
+            type_int += 256;
+        else if(!strcmp(subtype, "IImp"))
+            type_int += 512;
+        else if(!strcmp(subtype, "Inf"))
+            type_int += 1024;
+
+        else{ // for errors, unknown types, or no types (like with adverbs and prepositions)
+            type_int = 0;
+        } }
+    }
+
+    //create cell for fflechie
+    p_cell my_cell = malloc(sizeof(t_cell));
+    my_cell->forme_flechie = fflechie;
+    my_cell->number_type = type_int;
+    my_cell->next = NULL;
+
+    return my_cell;
+}
+
+
+
+void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *types)
 {
     p_node my_node = add_fbase(the_root, NULL, fbase, 0);
-    //Add the forme flechie to the list of the last node
 
+    //Add the forme flechie to the list of the last node
+    char *type, *token = strtok(types, ":");
     
+    while(token != NULL){
+        type = token;
+        token = strtok(NULL, ":");
+        p_cell my_cell = add_fflechie(fflechie, type);
+        
+        if(my_node->fflechies.head == NULL){ // checks if node has no fflechies yet
+            my_node->fflechies.head = &my_cell; 
+            my_node->fflechies.tail = &my_cell;
+        }
+        else{
+            (*my_node->fflechies.tail)->next = my_cell;
+            my_node->fflechies.tail = &my_cell;
+        }
+    }
 }
 
 t_tree create_empty_tree()
@@ -89,89 +166,81 @@ void fill_trees()
 
     //Reading of the file line by line
     char line[110];
-    char* f_flechie, *f_base, *category, *subtype;
+    char* f_flechie, *f_base, *category, *type;
     FILE *dictionary;
-    int index_line;
 
     //Opening of the file
-    dictionary = fopen("dictionnaire.txt","r");
+    //dictionary = fopen("dictionnaire.txt","r");
+    dictionary = fopen("dictionnaire_non_accentue.txt","r");
+
     
     //The while returns each line one by one as a string, line 
     while(fgets(line,110,dictionary))
-    {
-        //printf("%s",line);
-        index_line = 0;
-        //By using the create_sub_lines function, we cut up the different parts of the line into strings(f_flechie, f_base, category, subtype)
-        f_flechie = create_sub_lines(line, '\t', &index_line);
-        //puts(f_flechie);
-        //printf("\n");
-        f_base = create_sub_lines(line, '\t', &index_line);
-        //puts(f_base);
-        //printf("\n");
-        category = create_sub_lines(line, ':', &index_line);
-        //puts(category);
-        //printf("\n");
-        subtype = create_sub_lines(line, '\0', &index_line);
-        //puts(subtype);
-        //printf("\n");
+    {   
 
-        
+        split_line(line, &f_flechie, &f_base, &category, &type);
+
         //Now that we have each information of a line into the correct variables, we add it to the correct tree
         char categories[4][4] = {"Nom\0","Adj\0","Adv\0","Ver\0"};
         int found = -1;
-        for(int i = 0 ; i < 4 ; i++)
-        {
+        for(int i = 0 ; i < 4 ; i++){
             if (!strcmp(categories[i],category))//Looks if the category we have is among the four we consider
-            {
                 found = i;
-    
-            }
         }
     
         switch(found)
         {
             case 0:
                 //Functions to add the line in the noun_tree
-                add_word(&(noun_tree.roots), f_base, f_flechie, subtype);
+                add_word(&(noun_tree.roots), f_base, f_flechie, type);
                 break;
             case 1:
                 //Functions to add the line in the adj_tree
-                add_word(&(adj_tree.roots), f_base, f_flechie, subtype);
+                add_word(&(adj_tree.roots), f_base, f_flechie, type);
                 break;
             case 2:
                 //Functions to add the line in the adv_tree
-                add_word(&(adv_tree.roots), f_base, f_flechie, subtype);
+                add_word(&(adv_tree.roots), f_base, f_flechie, type);
                 break;
             case 3:
                 //Functions to add the line in the ver_tree
-                add_word(&(verb_tree.roots), f_base, f_flechie, subtype);
+                add_word(&(verb_tree.roots), f_base, f_flechie, type);
                 break;
             default :
                 break;
         }
     }
     
-    printf("noun tree :\n");
-    printPaths(noun_tree.roots.head);
-    printf("adj tree :\n");
-    printPaths(adj_tree.roots.head);
-    printf("adv tree :\n");
-    printPaths(adv_tree.roots.head);
-    printf("verb tree :\n");
-    printPaths(verb_tree.roots.head);
-    
-   printf("done");
-   fclose(dictionary);
+    fclose(dictionary);
+
+    /*
+    //Displaying all trees :
+    printf("=============\n Noun tree :\n=============\n\n");
+    print_tree_paths(noun_tree.roots);
+    printf("=============\n Adj tree :\n=============\n\n");
+    print_tree_paths(adj_tree.roots);
+    printf("=============\n Adv tree :\n=============\n\n");
+    print_tree_paths(adv_tree.roots);
+    printf("=============\n Verb tree :\n=============\n\n");
+    print_tree_paths(verb_tree.roots);
+    */
+
 }
 
 
-void printPaths(p_node node)
+void print_tree_paths(t_ht_list_node roots)
 {
-  char path[30];
-  printPathsRecur(node, path, 0);
+    char* path = malloc(roots.size*sizeof(char));
+    p_node tmp = roots.head;
+    for(int i = 0 ; i < roots.size ; i++){
+        printf("+---+\n| %c |\n+---+  ", tmp->letter);
+        print_node_paths(tmp, path, 0);
+        tmp = tmp->next;
+        printf("\n\n\n");
+    }
 }
 
-void printPathsRecur(p_node node, char path[], int pathLen)
+void print_node_paths(p_node node, char path[], int pathLen)
 {
   if (node==NULL)
     return;
@@ -181,9 +250,11 @@ void printPathsRecur(p_node node, char path[], int pathLen)
   pathLen++;
 
   /* it's a leaf, so print the path that led to here  */
-  if (node->next_letters.head == NULL)
-  {
-    printArray(path, pathLen);
+  if (node->next_letters.head == NULL){
+    
+    for (int i=0; i<pathLen; i++)
+        printf("%c", path[i]);
+    printf(" ");
   }
   else
   {
@@ -191,19 +262,8 @@ void printPathsRecur(p_node node, char path[], int pathLen)
     p_node temp = node->next_letters.head;
     while(temp != NULL)
     {
-        printPathsRecur(temp, path, pathLen);
+        print_node_paths(temp, path, pathLen);
         temp = temp->next;
     }
   }
 }
-
-void printArray(char chars[], int len)
-{
-  int i;
-  for (i=0; i<len; i++)
-  {
-    printf("%c", chars[i]);
-  }
-  printf("\n");
-}
-

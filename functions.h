@@ -2,5 +2,4 @@
 #include <stdio.h>
 #include <string.h>
 
-
-char* create_sub_lines(char line[110], char seperator, int * index_line);
+void split_line(char line[110], char** f_flechie, char** f_base, char** category, char** type); //splits line into 4 strings (f_flechie, f_base, category, type)

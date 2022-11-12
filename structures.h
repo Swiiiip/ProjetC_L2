@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 // Using forward declaration to avoid circular dependencies
 struct s_node; 
 struct s_ht_list_flechie;
@@ -51,20 +52,18 @@ typedef struct s_tree
     t_ht_list_node roots; //The roots are the first letters of the words
 }t_tree;
 
-//void add_word(t_tree mytree, char *fbase, char *fflechie, char *subtype);
-
 
 //     FUNCTIONS FOR TREE MANIPULATION    //
 t_tree create_empty_tree();
 void fill_trees();
-void display_tree(p_node,int);
-void printPaths(p_node node);
-void printPathsRecur(p_node node, char path[], int pathLen);
-void printArray(char chars[], int len);
+
+void print_tree_paths(t_ht_list_node roots);
+void print_node_paths(p_node node, char path[], int pathLen);
 
 //    FUNCTIONS FOR WORDS MANIPULATION    //
+p_cell add_fflechie(char* fflechie, char* types);
 p_node add_fbase(t_ht_list_node * siblings, p_node my_node, char * f_base, int index);
-void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *subtype);
+void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *type);
 
 //    USEFUL FUNCTIONS    //
 p_node search_letter(t_ht_list_node mylist, char letter);

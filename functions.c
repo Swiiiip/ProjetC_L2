@@ -1,29 +1,30 @@
 #include "functions.h"
 
-
-char * create_sub_lines(char line[110], char seperator, int * index_line)
+void split_line(char line[110], char** f_flechie, char** f_base, char** category, char** type)
 {
-    int index_string = 0;
-    int size = 0;
-    int temp = * index_line;
-    while(line[temp]!= seperator && line[temp] != '\0')
-    {
-        temp++;
-        size ++;//to determine the size of the sub_line
-    }
+    int i, type_size;
     
-    char * sub_line = (char*)malloc(sizeof(char)*size);//allocate the space for the sub_line
-    
-    while(line[*index_line]!= seperator && line[*index_line] != '\0')
-    {
-        sub_line[index_string] = line[*index_line];
-        index_string ++;
-        *index_line = *index_line + 1;
-    }
-    sub_line[index_string] = '\0';
-    *index_line = *index_line + 1;
+    char * token = strtok(line, "\t");
+    *f_flechie = token;
 
-    return sub_line;
+    token = strtok(NULL, "\t");
+    *f_base = token;
+    token = strtok(NULL, "\t");
+
+    *category = malloc(3 + 1);
+
+    for(i = 0; i < 3; i++)
+        (*category)[i] = token[i];
+    (*category)[i] = '\0';
+
+    type_size = strlen(token) - 3;
+    *type = malloc(type_size + 1);
+
+    for(i = 3; i <= type_size+1; i++)
+        (*type)[i-3] = token[i];
+    (*type)[i-3] = '\0';
+
+    return;
 }
 
 
