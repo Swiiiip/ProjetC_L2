@@ -11,6 +11,7 @@ p_node create_node(char character)
 
     mynode->fflechies.head = NULL;
     mynode->fflechies.tail = NULL;
+    mynode->fflechies.size = 0;
 
     mynode->next_letters.head = NULL;
     mynode->next_letters.tail = NULL;
@@ -112,7 +113,7 @@ p_cell add_fflechie(char* fflechie, char* type){
     }
 
     //create cell for fflechie
-    p_cell my_cell = malloc(sizeof(t_cell));
+    p_cell my_cell = (p_cell)malloc(sizeof(t_cell));
     my_cell->forme_flechie = fflechie;
     my_cell->number_type = type_int;
     my_cell->next = NULL;
@@ -125,22 +126,23 @@ p_cell add_fflechie(char* fflechie, char* type){
 void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *types)
 {
     p_node my_node = add_fbase(the_root, NULL, fbase, 0);
-
-    //Add the forme flechie to the list of the last node
-    char *type, *token = strtok(types, ":");
-    
-    while(token != NULL){
-        type = token;
-        token = strtok(NULL, ":");
-        p_cell my_cell = add_fflechie(fflechie, type);
-        
-        if(my_node->fflechies.head == NULL){ // checks if node has no fflechies yet
-            my_node->fflechies.head = &my_cell; 
-            my_node->fflechies.tail = &my_cell;
-        }
-        else{
-            (*my_node->fflechies.tail)->next = my_cell;
-            my_node->fflechies.tail = &my_cell;
+    if(types != NULL){
+        //Add the forme flechie to the list of the last node
+        char *type, *token = strtok(types, ":");
+        while(token != NULL){
+            type = token;
+            token = strtok(NULL, ":");
+            p_cell my_cell = add_fflechie(fflechie, type);
+            
+            if(my_node->fflechies.head == NULL){ // checks if node has no fflechies yet
+                my_node->fflechies.head = my_cell; 
+                my_node->fflechies.tail = my_cell;
+            }
+            else{
+                my_node->fflechies.tail->next = my_cell;
+                my_node->fflechies.tail = my_cell;
+            }
+            my_node->fflechies.size ++;
         }
     }
 }
@@ -210,20 +212,25 @@ void fill_trees()
                 break;
         }
     }
-    
     fclose(dictionary);
 
-    /*
+    
     //Displaying all trees :
+    
     printf("=============\n Noun tree :\n=============\n\n");
-    print_tree_paths(noun_tree.roots);
+    print_tree_paths(noun_tree.roots);/*
     printf("=============\n Adj tree :\n=============\n\n");
     print_tree_paths(adj_tree.roots);
     printf("=============\n Adv tree :\n=============\n\n");
     print_tree_paths(adv_tree.roots);
     printf("=============\n Verb tree :\n=============\n\n");
-    print_tree_paths(verb_tree.roots);
-    */
+    print_tree_paths(verb_tree.roots);*/
+    if(search_fbase(noun_tree.roots, "symphorine",0))
+        printf("Found\n");
+    else
+        printf("Not found\n");
+    
+    
 
 }
 
@@ -254,8 +261,9 @@ void print_node_paths(p_node node, char path[], int pathLen)
     
     for (int i=0; i<pathLen; i++)
         printf("%c", path[i]);
-    printf(" ");
+    printf("%d ",node->fflechies.size);
   }
+  
   else
   {
     /* otherwise try both subtrees */
@@ -267,3 +275,37 @@ void print_node_paths(p_node node, char path[], int pathLen)
     }
   }
 }
+
+
+int search_fbase(t_ht_list_node roots, char *fbase, int index)
+{
+    p_node tmp = roots.head;
+    int i = 0;
+    while(tmp != NULL && i < roots.size){
+        if(tmp->letter == fbase[index])
+        {
+            if(index == strlen(fbase)-1)
+                return 1;
+            else
+                return search_fbase(tmp->next_letters, fbase, index+1);
+        }
+        tmp = tmp->next;
+        i++;
+    }
+    return 0;
+}
+/*
+int search_fbase(p_node node, char *fbase, int index)
+{
+    if(node == NULL)
+        return 0;
+    if(node->letter == fbase[index])
+    {
+        if(index == strlen(fbase)-1)
+            return 1;
+        else
+            return search_fbase(node->next_letters.head, fbase, index+1);
+    }
+    else
+        return 0;
+}*/

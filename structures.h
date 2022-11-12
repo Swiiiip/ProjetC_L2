@@ -21,7 +21,7 @@ typedef t_cell *p_cell;
 typedef struct s_ht_list_flechie
 {
     int size;
-    p_cell *head, *tail; // First and Last cell of the list
+    t_cell *head, *tail; // First and Last cell of the list
 
 } t_ht_list_flechie;
 
@@ -64,6 +64,7 @@ void print_node_paths(p_node node, char path[], int pathLen);
 p_cell add_fflechie(char* fflechie, char* types);
 p_node add_fbase(t_ht_list_node * siblings, p_node my_node, char * f_base, int index);
 void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *type);
+int search_fbase(t_ht_list_node roots, char *fbase, int index);
 
 //    USEFUL FUNCTIONS    //
 p_node search_letter(t_ht_list_node mylist, char letter);
