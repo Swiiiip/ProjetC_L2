@@ -193,8 +193,8 @@ void fill_trees()
 
     //Opening of the file
     //dictionary = fopen("dictionnaire.txt","r");
-    dictionary = fopen("minidictionnary.txt","r");
-    //dictionary = fopen("dictionnaire_non_accentue.txt","r");
+    //dictionary = fopen("minidictionnary.txt","r");
+    dictionary = fopen("dictionnaire_non_accentue.txt","r");
 
     
     //The while returns each line one by one as a string, line 
@@ -238,7 +238,7 @@ void fill_trees()
 
 
     //Displaying all trees :
-    
+    /*
     printf("=============\n Noun tree :\n=============\n\n");
     print_tree_paths(noun_tree.roots);
     printf("=============\n Adj tree :\n=============\n\n");
@@ -246,15 +246,10 @@ void fill_trees()
     printf("=============\n Adv tree :\n=============\n\n");
     print_tree_paths(adv_tree.roots);
     printf("=============\n Verb tree :\n=============\n\n");
-    print_tree_paths(verb_tree.roots);
+    print_tree_paths(verb_tree.roots);*/
 
     //Example for the search_fbase function
-    /*
-    if(search_fbase(noun_tree.roots, "chat",0))
-        printf("Found\n");
-    else
-        printf("Not found\n");
-    */
+    search_fbase(noun_tree.roots, "fqdsfq",0);
 
     //Example for the random fbase function
     //extract_random_fbase(verb_tree);
@@ -289,7 +284,7 @@ void print_node_paths(p_node node, char path[], int pathLen)
     
     for (int i=0; i<pathLen; i++)
         printf("%c", path[i]);
-
+    printf(" ");
     //COMMENT THIS PART IF YOU DON'T WANT TO SEE THE FORMES FLECHIES :
 
     /*
@@ -318,7 +313,7 @@ void print_node_paths(p_node node, char path[], int pathLen)
 }
 
 
-int search_fbase(t_ht_list_node roots, char *fbase, int index)
+void search_fbase(t_ht_list_node roots, char *fbase, int index)
 {
     p_node tmp = roots.head;
     int i = 0;
@@ -326,14 +321,19 @@ int search_fbase(t_ht_list_node roots, char *fbase, int index)
         if(tmp->letter == fbase[index]){
             
             if(index == strlen(fbase)-1)
-                return 1;
+            {
+                printf("\nThe word %s has been found.\n", fbase);
+                print_fflechies(tmp);
+                return;
+            }
             else
                 return search_fbase(tmp->next_letters, fbase, index+1);
         }
         tmp = tmp->next;
         i++;
     }
-    return 0;
+    printf("\nThe word %s has not been found.\n", fbase);
+    return;
 }
 
 
@@ -354,18 +354,25 @@ void extract_random_fbase(t_tree mytree)
 
     printf("\nThe word '%c",tmp->letter);
     p_node last_node_fbase = random_path(tmp);
-    printf("' is a base form. ");
-    if(last_node_fbase->fflechies.head == NULL) //Case of the adverb tree
+    printf("' is a base form. "); 
+    print_fflechies(last_node_fbase);
+}
+
+
+//Used to print all fflechies of a fbase
+void print_fflechies(p_node leaf)
+{
+    if(leaf->fflechies.head == NULL) //Case of the adverb tree
         printf("Since it is an adverb, it doesn't have any contracted forms.\n");
     else
     {
-        if(last_node_fbase->fflechies.size == 1)//If there is only one fflechie, we use the singular in the sentence
+        if(leaf->fflechies.size == 1)//If there is only one fflechie, we use the singular in the sentence
             //Need to modify to put into words the number type -> need a new function
-            printf("Its contracted form is :\n\t- '%s' which is of number %d (temporary display).\n\n",last_node_fbase->fflechies.head->forme_flechie, last_node_fbase->fflechies.head->number_type);
+            printf("Its contracted form is :\n\t- '%s' which is of number %d (temporary display).\n\n",leaf->fflechies.head->forme_flechie, leaf->fflechies.head->number_type);
         else 
         {
             printf("Its contracted forms are :\n");
-            p_cell temp = last_node_fbase->fflechies.head;
+            p_cell temp = leaf->fflechies.head;
             while(temp != NULL)
             {
                 printf("\t- '%s' which is of number %d (temporary display).\n",temp->forme_flechie,temp->number_type);
@@ -373,7 +380,7 @@ void extract_random_fbase(t_tree mytree)
             }
             printf("\n");
         }
-    }    
+    }   
 }
 
 
