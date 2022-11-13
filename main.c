@@ -6,7 +6,7 @@ int main()
    
     clock_t start, end;
     start = clock();
-   
+    srand(time(NULL));
     fill_trees();
     
     end = clock();

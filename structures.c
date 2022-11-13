@@ -216,20 +216,27 @@ void fill_trees()
 
     
     //Displaying all trees :
-    
+    /*
     printf("=============\n Noun tree :\n=============\n\n");
-    print_tree_paths(noun_tree.roots);/*
+    print_tree_paths(noun_tree.roots);*/
     printf("=============\n Adj tree :\n=============\n\n");
-    print_tree_paths(adj_tree.roots);
+    print_tree_paths(adj_tree.roots);/*
     printf("=============\n Adv tree :\n=============\n\n");
     print_tree_paths(adv_tree.roots);
     printf("=============\n Verb tree :\n=============\n\n");
     print_tree_paths(verb_tree.roots);*/
-    if(search_fbase(noun_tree.roots, "symphorine",0))
+
+    //Example for the search_fbase function
+    /*
+    if(search_fbase(noun_tree.roots, "chat",0))
         printf("Found\n");
     else
         printf("Not found\n");
-    
+    */
+
+    //Example for the random fbase function
+    //extract_random_fbase(verb_tree);
+
     
 
 }
@@ -261,7 +268,7 @@ void print_node_paths(p_node node, char path[], int pathLen)
     
     for (int i=0; i<pathLen; i++)
         printf("%c", path[i]);
-    printf("%d ",node->fflechies.size);
+    printf(" -> %s : %d ",node->fflechies.head->forme_flechie, node->fflechies.size);
   }
   
   else
@@ -294,18 +301,61 @@ int search_fbase(t_ht_list_node roots, char *fbase, int index)
     }
     return 0;
 }
-/*
-int search_fbase(p_node node, char *fbase, int index)
+
+
+void extract_random_fbase(t_tree mytree)
 {
-    if(node == NULL)
-        return 0;
-    if(node->letter == fbase[index])
+    int tree_roots_size = 0;
+    p_node tmp = mytree.roots.head;
+    while(tmp != NULL)//Count the number of letter in the root of the tree
     {
-        if(index == strlen(fbase)-1)
-            return 1;
-        else
-            return search_fbase(node->next_letters.head, fbase, index+1);
+        tree_roots_size ++;
+        tmp = tmp->next;
     }
+    tmp = mytree.roots.head;
+    int random = rand() % tree_roots_size;
+    for (int i = 0;i < random; i++)//Access to the root chosen randomly
+        tmp = tmp->next;
+
+
+    printf("\nThe word '%c",tmp->letter);
+    p_node last_node_fbase = random_path(tmp);
+    printf("' is a base form. ");
+    if(last_node_fbase->fflechies.head == NULL) //Case of the adverb tree
+        printf("Since it is an adverb, it doesn't have any contracted forms.\n");
     else
-        return 0;
-}*/
+    {
+        if(last_node_fbase->fflechies.size == 1)//If there is only one fflechie, we use the singular in the sentence
+            //Need to modify to put into words the number type -> need a new function
+            printf("Its contracted form is :\n\t- '%s' which is of number %d (temporary display).\n\n",last_node_fbase->fflechies.head->forme_flechie, last_node_fbase->fflechies.head->number_type);
+        else 
+        {
+            printf("Its contracted forms are :\n");
+            p_cell temp = last_node_fbase->fflechies.head;
+            while(temp != NULL)
+            {
+                printf("\t- '%s' which is of number %d (temporary display).\n",temp->forme_flechie,temp->number_type);
+                temp = temp->next;
+            }
+            printf("\n");
+        }
+    }    
+}
+
+
+//Need to modify later so that it prints the path outside of the function so that this can be used in the sentence generator 
+
+p_node random_path(p_node current)
+{
+    if(current->next_letters.head == NULL)
+        return current;
+    else
+    {
+        int random = rand() % current->next_letters.size;
+        p_node temp = current->next_letters.head;
+        for(int i = 0 ; i < random ; i++)
+            temp = temp->next;
+        printf("%c",temp->letter);
+        return random_path(temp);
+    }
+}
