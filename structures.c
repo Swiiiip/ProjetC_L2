@@ -61,8 +61,7 @@ p_node add_fbase(t_ht_list_node * siblings, p_node my_node,char * f_base, int in
     add_fbase(&(temp->next_letters), temp, f_base, index + 1);
 }
 
-p_cell add_fflechie(char* fflechie, char* type){
-
+int conversion_type(char* type){
     int type_int = 0;
     char *subtype, *token = strtok(type, "+");
     
@@ -79,7 +78,7 @@ p_cell add_fflechie(char* fflechie, char* type){
 
         if(!strcmp(subtype, "InvGen"))
             type_int += 2 + 1;
-        else{ if(!strcmp(subtype, "Mas"))
+        else if(!strcmp(subtype, "Mas"))
             type_int += 1;
         else if(!strcmp(subtype, "Fem"))
             type_int += 2;
@@ -114,8 +113,15 @@ p_cell add_fflechie(char* fflechie, char* type){
             //printf("%s : Unknown subtype : %s\n", fflechie, subtype);
             break;
         } 
-        }
+    
     }
+
+    return type_int;
+}
+
+p_cell add_fflechie(char* fflechie, char* type){
+
+    int type_int = conversion_type(type);
     
     if(type_int == -1) //exclude forbidden typed p_cell
         return NULL;
@@ -134,8 +140,6 @@ p_cell add_fflechie(char* fflechie, char* type){
         return my_cell;
     }
 }
-
-
 
 void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *types)
 {

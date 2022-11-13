@@ -64,14 +64,14 @@ void print_node_paths(p_node node, char path[], int pathLen);
 p_cell add_fflechie(char* fflechie, char* types);
 p_node add_fbase(t_ht_list_node * siblings, p_node my_node, char * f_base, int index);
 void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *type);
+
+//    USEFUL FUNCTIONS    //
+int conversion_type(char* type);
+p_node search_letter(t_ht_list_node mylist, char letter);
 void search_fbase(t_ht_list_node roots, char *fbase, int index);
 void extract_random_fbase(t_tree);
 p_node random_path(p_node);
 
-//    USEFUL FUNCTIONS    //
-p_node search_letter(t_ht_list_node mylist, char letter);
-void print_fflechies(p_node leaf);
 
 //    FUNCTIONS FOR NODE MANIPULATION    //
 p_node create_node(char letter);
-
