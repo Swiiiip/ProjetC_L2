@@ -23,7 +23,7 @@ void split_line(char line[110], char** f_flechie, char** f_base, char** category
     for(i = 3; i <= type_size+1; i++)
         (*type)[i-3] = token[i];
     (*type)[i-3] = '\0';
-
+    
     return;
 }
 
