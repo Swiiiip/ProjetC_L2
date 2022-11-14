@@ -61,7 +61,8 @@ p_node add_fbase(t_ht_list_node * siblings, p_node my_node,char * f_base, int in
     add_fbase(&(temp->next_letters), temp, f_base, index + 1);
 }
 
-int conversion_type(char* type){
+p_cell add_fflechie(char* fflechie, char* type){
+
     int type_int = 0;
     char *subtype, *token = strtok(type, "+");
     
@@ -78,7 +79,7 @@ int conversion_type(char* type){
 
         if(!strcmp(subtype, "InvGen"))
             type_int += 2 + 1;
-        else if(!strcmp(subtype, "Mas"))
+        else{ if(!strcmp(subtype, "Mas"))
             type_int += 1;
         else if(!strcmp(subtype, "Fem"))
             type_int += 2;
@@ -113,15 +114,8 @@ int conversion_type(char* type){
             //printf("%s : Unknown subtype : %s\n", fflechie, subtype);
             break;
         } 
-    
+        }
     }
-
-    return type_int;
-}
-
-p_cell add_fflechie(char* fflechie, char* type){
-
-    int type_int = conversion_type(type);
     
     if(type_int == -1) //exclude forbidden typed p_cell
         return NULL;
@@ -141,7 +135,9 @@ p_cell add_fflechie(char* fflechie, char* type){
     }
 }
 
-void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *types)
+
+
+void add_word(t_ht_list_node *the_root, char *fbase, char *fflechie, char *types)
 {
     p_node my_node = add_fbase(the_root, NULL, fbase, 0);
     if(types != NULL){
@@ -188,7 +184,6 @@ void fill_trees()
     t_tree verb_tree = create_empty_tree();
     t_tree adj_tree = create_empty_tree();
     t_tree adv_tree = create_empty_tree();
-
 
     //Reading of the file line by line
     char line[110];
@@ -253,11 +248,20 @@ void fill_trees()
     print_tree_paths(verb_tree.roots);*/
 
     //Example for the search_fbase function
-    search_fbase(noun_tree.roots, "fqdsfq",0);
+    //search_fbase(noun_tree.roots, "fqdsfq",0);
 
     //Example for the random fbase function
-    //extract_random_fbase(verb_tree);
+    extract_random_fbase(verb_tree);
 
+    //printf("%d",number_paths(verb_tree.roots.head));
+    /*
+    t_tree * p_noun_tree = &noun_tree;
+    t_tree * p_verb_tree = &verb_tree;
+    t_tree * p_adj_tree = &adj_tree;
+    t_tree * p_adv_tree = &adv_tree;
+    t_tree* trees[4] = {p_noun_tree, p_verb_tree, p_adj_tree, p_adv_tree};
+    return trees;
+    */
 }
 
 
@@ -269,7 +273,7 @@ void print_tree_paths(t_ht_list_node roots)
         printf("+---+\n| %c |\n+---+  ", tmp->letter);
         print_node_paths(tmp, path, 0);
         tmp = tmp->next;
-        printf("\n\n\n[ENTER] \n\n\n");
+        printf("\n\n\n [ENTER] \n\n\n");
         //getchar();
     }
 }
@@ -317,6 +321,7 @@ void print_node_paths(p_node node, char path[], int pathLen)
 }
 
 
+
 void search_fbase(t_ht_list_node roots, char *fbase, int index)
 {
     p_node tmp = roots.head;
@@ -336,7 +341,7 @@ void search_fbase(t_ht_list_node roots, char *fbase, int index)
         tmp = tmp->next;
         i++;
     }
-    printf("\nThe word %s has not been found.\n", fbase);
+    printf("\nThe word %s has not been found. Would you like to add it to our dictionary ?\n", fbase);
     return;
 }
 
@@ -357,7 +362,7 @@ void extract_random_fbase(t_tree mytree)
 
 
     printf("\nThe word '%c",tmp->letter);
-    p_node last_node_fbase = random_path(tmp);
+    p_node last_node_fbase = random_path(tmp,1);
     printf("' is a base form. "); 
     print_fflechies(last_node_fbase);
 }
@@ -388,19 +393,45 @@ void print_fflechies(p_node leaf)
 }
 
 
-//Need to modify later so that it prints the path outside of the function so that this can be used in the sentence generator 
 
-p_node random_path(p_node current)
+p_node random_path(p_node current, int print_path)
 {
-    if(current->next_letters.head == NULL)
-        return current;
+    if(current->fflechies.head != NULL)
+    {
+        if(rand() % number_paths(current) == 0 || current->next_letters.head == NULL)
+            return current;
+    }        
     else
     {
         int random = rand() % current->next_letters.size;
         p_node temp = current->next_letters.head;
         for(int i = 0 ; i < random ; i++)
             temp = temp->next;
-        printf("%c",temp->letter);
-        return random_path(temp);
+        if(print_path)
+        {
+            printf("%c",temp->letter);
+            return random_path(temp,1);
+        }
+        else 
+            return random_path(temp,0);            
     }
 }
+
+
+int number_paths(p_node current)
+{
+    if(current->next_letters.head == NULL)
+        return 1;
+    else
+    {
+        int sum = 0;
+        p_node temp = current->next_letters.head;
+        while(temp != NULL)
+        {
+            sum += number_paths(temp);
+            temp = temp->next;
+        }
+        return sum;
+    }
+}
+

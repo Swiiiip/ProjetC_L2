@@ -1,5 +1,7 @@
-#include "structures.h"
+#include "menu.h"
 #include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 int main(){
     srand(time(NULL));
@@ -7,7 +9,7 @@ int main(){
     clock_t start, end;
     start = clock();
     
-    fill_trees();
+    main_menu();
     
     end = clock();
     printf("\n\n========================\n Time taken: %f s\n========================\n\n", (double)(end - start) / CLOCKS_PER_SEC);
