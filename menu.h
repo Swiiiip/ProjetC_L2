@@ -1,3 +1,4 @@
+#include "structures.h"
 
 void main_menu();
 void title(char *title);
