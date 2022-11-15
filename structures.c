@@ -1,5 +1,6 @@
 #include "structures.h"
 #include "functions.h"
+#include <math.h>
 #include <stdlib.h>
 
 p_node create_node(char character)
@@ -63,7 +64,9 @@ p_node add_fbase(t_ht_list_node * siblings, p_node my_node,char * f_base, int in
 
 int conversion_type(char* type){
     int type_int = 0;
-    char *subtype, *token = strtok(type, "+");
+    char * temp = (char*)malloc((strlen(type)+1) * sizeof(char));
+    strcpy(temp, type);
+    char *subtype, *token = strtok(temp, "+");
     
     while(token != NULL){
         subtype = token;
@@ -237,6 +240,10 @@ void fill_trees()
                 break;
         }
     }
+
+    t_tree t_trees[4] = {noun_tree, adj_tree, verb_tree, adv_tree};
+    generate_modele1(t_trees);
+
     
     fclose(dictionary);
 
@@ -253,7 +260,7 @@ void fill_trees()
     print_tree_paths(verb_tree.roots);*/
 
     //Example for the search_fbase function
-    search_fbase(noun_tree.roots, "fqdsfq",0);
+    //search_fbase(noun_tree.roots, "fqdsfq",0);
 
     //Example for the random fbase function
     //extract_random_fbase(verb_tree);
@@ -273,6 +280,7 @@ void print_tree_paths(t_ht_list_node roots)
         //getchar();
     }
 }
+
 
 void print_node_paths(p_node node, char path[], int pathLen)
 {
@@ -400,7 +408,197 @@ p_node random_path(p_node current)
         p_node temp = current->next_letters.head;
         for(int i = 0 ; i < random ; i++)
             temp = temp->next;
-        printf("%c",temp->letter);
         return random_path(temp);
     }
 }
+
+char * generate_random_type(int mode){
+
+    char * type = malloc(18*sizeof(char));
+ 
+    char random_subtype1 [][7]= {"Mas","Fem","InvGen"};
+    int index1 = rand() % 3;
+    char random_subtype2[][6] = {"SG","PL","InvPL"};
+    int index2 = rand() % 3;
+
+    strcpy(type, random_subtype1[index1]);
+    strcat(type, "+");
+    strcat(type,random_subtype2[index2]);
+    
+   
+    if(mode == 1){
+    char random_subtype3[][3] = {"P1","P2", "P3"};
+    int index3 = rand() % 3;
+    char random_subtype4[][5] = {"Inf","IImp", "IPre", "SPre"};
+    int index4 = rand() % 4;
+    strcat(type, "+");
+    strcat(type,random_subtype3[index3]);
+    strcat(type, "+");
+    strcat(type,random_subtype4[index4]);
+    }
+    return type;
+    
+}
+
+char * generate_modele1(t_tree * trees)
+{
+    char * noun_type = generate_random_type(0); // Example "Mas+SG"
+    char * sub_verb_type = (char*)malloc(5*sizeof(char)); 
+    int founds = 0, cpt_noun =0, cpt_verb =0;
+    while(cpt_noun < strlen(noun_type)){
+
+        if (founds == 1){
+            sub_verb_type[cpt_verb] = noun_type[cpt_noun];
+            cpt_verb++;
+        }
+
+        if('+' == noun_type[cpt_noun]){
+            founds++;
+        }
+        if(founds == 2){
+            break;
+        }
+        cpt_noun++;
+    }
+
+    if(!strcmp(sub_verb_type, "InvPL")){
+        strcpy(sub_verb_type, "SG");
+    }
+    
+    int noun_type_1 = conversion_type(noun_type);
+    int adj_type = noun_type_1;
+    strcat(sub_verb_type, "+P3");
+    int verb_type = conversion_type(sub_verb_type);
+    //int verb_type = conversion_type(random_type);
+
+    char * noun1_flechie = malloc(50*sizeof(char));
+    char * adj_flechie = malloc(50*sizeof(char));
+    char * verb_flechie = malloc(50*sizeof(char));
+    char * noun2_flechie = malloc(50*sizeof(char));
+
+    // Finding a noun that correcsponds to the type
+    noun1_flechie = finding_fflechie_corresponding_to_type(trees[0], noun_type_1);
+    // Finding an adjective that correcsponds to the type
+    adj_flechie = finding_fflechie_corresponding_to_type(trees[1], adj_type);
+    // Finding a verb that correcsponds to the type
+    verb_flechie = finding_fflechie_corresponding_to_type(trees[2], verb_type);
+    //Finding a random second noun
+    p_node tmp = trees[0].roots.head;
+        int random = rand() % trees[0].roots.size;
+        for (int i = 0;i < random; i++)//Access to the root chosen randomly
+            tmp = tmp->next;
+    p_node noun2 = random_path(tmp);
+
+    int i = rand() % (noun2->fflechies.size);
+    p_cell temp = noun2->fflechies.head;
+    for(int j = 0; j < i; j++)
+        temp = temp->next;
+
+    noun2_flechie = temp->forme_flechie;
+    int noun_type_2 = temp->number_type; // Used for the determinant of the second noun
+
+    char * determinant_noun1 = determinant_generator(noun_type_1);
+    char * determinant_noun2 = determinant_generator(noun_type_2);
+
+    char * sentence = (char*)malloc(100*sizeof(char));
+    strcpy(sentence, determinant_noun1);
+    strcat(sentence, " ");
+    strcat(sentence, noun1_flechie);
+    strcat(sentence, " ");
+    strcat(sentence, adj_flechie);
+    strcat(sentence, " ");
+    strcat(sentence, verb_flechie);
+    strcat(sentence, " ");
+    strcat(sentence, determinant_noun2);
+    strcat(sentence, " ");
+    strcat(sentence, noun2_flechie);
+    printf("%s", sentence);
+
+    return sentence;
+    
+}
+
+char * finding_fflechie_corresponding_to_type(t_tree my_tree, int type){
+    char * fflechie = malloc(50*sizeof(char));
+    int found = 0;
+    while(!found)
+    {
+        p_node tmp = my_tree.roots.head;
+        int random = rand() % my_tree.roots.size;
+        for (int i = 0;i < random; i++)//Access to the root chosen randomly
+            tmp = tmp->next;
+        
+        p_node categorie = random_path(tmp);
+        p_cell temp = categorie->fflechies.head;
+        for(int i = 0; i< categorie->fflechies.size; i++){
+    
+            if(is_type_in(type, temp->number_type)){
+
+                found = 1;
+                fflechie = temp->forme_flechie;
+                break;
+            }
+            temp = temp->next;
+        }
+    }
+    return fflechie;
+
+}
+
+char * determinant_generator(int type){
+
+    char  dets_M_S[][7] = {"le", "un", "mon", "ton", "son", "notre", "votre", "leur"};
+    char  dets_F_S[][7] = {"la", "une", "ma", "ta", "sa", "notre", "votre", "leur"};
+    char  dets_M_F_P[][7] = {"les", "des", "mes", "tes", "ses", "nos", "vos", "leurs"};
+    char * determinant_noun= malloc(7*sizeof(char));
+    int random_integer_1 = rand() % 8;
+
+   if(type == 6 || type == 7){
+        strcpy(determinant_noun, dets_F_S[random_integer_1]);
+    }
+    else if(type == 9 || type == 10 || type == 11){
+        strcpy(determinant_noun, dets_M_F_P[random_integer_1]);
+
+    }else{
+        strcpy(determinant_noun, dets_M_S[random_integer_1]);
+    }
+    return determinant_noun;
+
+
+}
+
+int is_type_in( int desired_type, int full_type){
+
+    //convert decimal full_type into binary
+    int i, binary_desired[11], binary_full[11];
+
+    for(i = 0; i < 11; i++){
+        binary_full[i] = full_type % 2;
+        full_type /= 2;
+    }
+
+    //convert decimal desired_type into binary
+    for(i = 0; i < 11; i++){
+        binary_desired[i] = desired_type % 2;
+        desired_type /= 2;
+    }
+
+    //check if desired type is in full type
+    for(i = 11; i > 0; i--)
+        if(binary_desired[i] == 1 && binary_full[i] == 0)
+            return 0;
+    
+    return 1;
+}
+
+
+
+    
+
+    
+
+
+ 
+
+
+    
