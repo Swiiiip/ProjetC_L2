@@ -69,6 +69,7 @@ void extract_random_fbase(t_tree);
 p_node random_path(p_node, int);
 
 //    USEFUL FUNCTIONS    //
+int conversion_type(char* type);
 p_node search_letter(t_ht_list_node mylist, char letter);
 void print_fflechies(p_node leaf);
 int number_paths(p_node current);
@@ -76,3 +77,13 @@ int number_paths(p_node current);
 //    FUNCTIONS FOR NODE MANIPULATION    //
 p_node create_node(char letter);
 
+
+
+char * generate_random_type(int mode);
+char * generate_modele1(t_tree * trees);
+
+void print_fflechies(p_node leaf);
+
+char * finding_fflechie_corresponding_to_type(t_tree my_tree, int type);
+char * determinant_generator(int type);
+int is_type_in( int desired_type, int full_type);
