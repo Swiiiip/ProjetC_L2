@@ -10,6 +10,7 @@ int main(){
     start = clock();
     
     main_menu();
+    
 
     
     end = clock() ;

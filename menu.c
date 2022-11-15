@@ -11,11 +11,11 @@ void main_menu()
            "- 3 to check if a word of your choice is in our dictionary\n"
            "- 0 to exit\n>>> ");
     scanf("%d", &user_input);
-    fill_trees();
+    t_tree * my_trees = fill_trees();
     switch (user_input)
     {
         case 1:
-            generate_sentence();
+            generate_sentence(my_trees);
             break;
         case 2:
             extract_random_word();
@@ -31,14 +31,15 @@ void main_menu()
         default:
             break;
     }
-    printf("Thanks for using our sentence generator !\nThis project was made by HATOUM Jade, RENNO Joseph, and BAUDET Quentin.\n");
+    printf("\nThanks for using our sentence generator !\nThis project was made by HATOUM Jade, RENNO Joseph, and BAUDET Quentin.\n");
 
 }
 
-void generate_sentence()
+void generate_sentence(t_tree * my_trees)
 {
     title("GENERATE RANDOM SENTENCE");
     int sentence_model;
+    int choice_form;
     printf("You can generate a sentence from three different models :\n"
            "1 - Noun - Adjective - Verb - Noun\n"
            "2 - Noun - 'Qui' - Verb - Verb - Noun - Adjective\n"
@@ -47,8 +48,27 @@ void generate_sentence()
     scanf("%d", &sentence_model);
     switch (sentence_model)
     {
+        
         case 1:
-            //generate_modele1();
+            
+            printf("Please choose whether you want it in base form or contracted form:\n"
+                   "1 - Base form\n"
+                   "2 - Contracted form\n>>> ");
+
+            scanf("%d", &choice_form);
+            if(choice_form == 1)
+            {
+                generate_modele1(my_trees,0);
+            }
+            else if(choice_form == 2)
+            {
+                generate_modele1(my_trees,1);
+            }
+            else
+            {
+                printf("Invalid Input\n");
+            }
+
             break;
         case 2:
             //generate_modele2();

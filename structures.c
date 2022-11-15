@@ -3,6 +3,9 @@
 #include <math.h>
 #include <stdlib.h>
 
+#define CATEGORY_SIZE 4
+const char* categories[CATEGORY_SIZE]={"Nom","Adj","Adv","Ver"};
+
 p_node create_node(char character)
 {
     p_node mynode = malloc(sizeof(t_node));
@@ -187,13 +190,14 @@ t_tree create_empty_tree()
 
 }
 
-void fill_trees()
-{
-    //Creation of the empty trees and initialisation of their fields
-    t_tree noun_tree = create_empty_tree();
-    t_tree verb_tree = create_empty_tree();
-    t_tree adj_tree = create_empty_tree();
-    t_tree adv_tree = create_empty_tree();
+t_tree* fill_trees()
+{   
+
+    //Creation of the array of trees
+    t_tree* trees = malloc(CATEGORY_SIZE*sizeof(t_tree));
+    
+    for(int i=0; i<CATEGORY_SIZE ; i++)
+        trees[i] = create_empty_tree();
 
     //Reading of the file line by line
     char line[110];
@@ -205,79 +209,22 @@ void fill_trees()
     //dictionary = fopen("minidictionnary.txt","r");
     dictionary = fopen("dictionnaire_non_accentue.txt","r");
 
-    
     //The while returns each line one by one as a string, line 
-    while(fgets(line,110,dictionary))
-    {   
+    while(fgets(line,110,dictionary)){   
 
         split_line(line, &f_flechie, &f_base, &category, &type);
-        
-        //Now that we have each information of a line into the correct variables, we add it to the correct tree
-        char categories[4][4] = {"Nom\0","Adj\0","Adv\0","Ver\0"};
-        int found = -1;
-        for(int i = 0 ; i < 4 ; i++){
-            if (!strcmp(categories[i],category))//Looks if the category we have is among the four we consider
-                found = i;
-        }
     
-        switch(found)
-        {
-            case 0:
-                //Functions to add the line in the noun_tree
-                add_word(&(noun_tree.roots), f_base, f_flechie, type);
-                break;
-            case 1:
-                //Functions to add the line in the adj_tree
-                add_word(&(adj_tree.roots), f_base, f_flechie, type);
-                break;
-            case 2:
-                //Functions to add the line in the adv_tree
-                add_word(&(adv_tree.roots), f_base, f_flechie, type);
-                break;
-            case 3:
-                //Functions to add the line in the ver_tree
-                add_word(&(verb_tree.roots), f_base, f_flechie, type);
-                break;
-            default :
-                break;
-        }
-        
+        //Now that we have each information of a line into the correct variables, we add it to the correct tree
+        for(int i = 0 ; i < CATEGORY_SIZE ; i++)
+            if (!strcmp(categories[i],category))//Looks if the category we have is among the $CATEGORY_SIZE we consider
+                add_word(&(trees[i].roots), f_base, f_flechie, type);
 
     }
-
-    
     
 
-    
     fclose(dictionary);
 
-
-    //Displaying all trees :
-    /*
-    printf("=============\n Noun tree :\n=============\n\n");
-    print_tree_paths(noun_tree.roots);
-    printf("=============\n Adj tree :\n=============\n\n");
-    print_tree_paths(adj_tree.roots);
-    printf("=============\n Adv tree :\n=============\n\n");
-    print_tree_paths(adv_tree.roots);
-    printf("=============\n Verb tree :\n=============\n\n");
-    print_tree_paths(verb_tree.roots);*/
-
-    //Example for the search_fbase function
-    //search_fbase(noun_tree.roots, "fqdsfq",0);
-
-    //Example for the random fbase function
-    //extract_random_fbase(verb_tree);
-
-    //printf("%d",number_paths(verb_tree.roots.head));
-    /*
-    t_tree * p_noun_tree = &noun_tree;
-    t_tree * p_verb_tree = &verb_tree;
-    t_tree * p_adj_tree = &adj_tree;
-    t_tree * p_adv_tree = &adv_tree;
-    t_tree* trees[4] = {p_noun_tree, p_verb_tree, p_adj_tree, p_adv_tree};
     return trees;
-    */
 }
 
 
@@ -290,7 +237,7 @@ void print_tree_paths(t_ht_list_node roots)
         print_node_paths(tmp, path, 0);
         tmp = tmp->next;
         printf("\n\n\n [ENTER] \n\n\n");
-        //getchar();
+        getchar();
     }
 }
 
@@ -413,25 +360,31 @@ void print_fflechies(p_node leaf)
 
 p_node random_path(p_node current, int print_path)
 {
+    //printf("I eneter the function");
     if(current->fflechies.head != NULL)
     {
-        if(rand() % number_paths(current) == 0 || current->next_letters.head == NULL)
+        //printf("I am a leaf");
+       
+        if(rand() % number_paths(current) == 0 || current->next_letters.head == NULL){
+            //printf("test1 last letter");
             return current;
-    }        
-    else
-    {
-        int random = rand() % current->next_letters.size;
-        p_node temp = current->next_letters.head;
-        for(int i = 0 ; i < random ; i++)
-            temp = temp->next;
-        if(print_path)
-        {
-            printf("%c",temp->letter);
-            return random_path(temp,1);
         }
-        else 
-            return random_path(temp,0);            
+    }        
+    
+    //printf("test2 ");
+    int random = rand() % current->next_letters.size;
+    p_node temp = current->next_letters.head;
+    for(int i = 0 ; i < random ; i++)
+        temp = temp->next;
+        //printf("In the for");
+    if(print_path)
+    {
+        printf("%c",temp->letter);
+        return random_path(temp,1);
     }
+    else 
+        return random_path(temp,0);            
+
 }
 
 
@@ -480,8 +433,9 @@ char * generate_random_type(int mode){
     
 }
 
-char * generate_modele1(t_tree * trees)
+void generate_modele1(t_tree * trees, int mode_fflechie)
 {
+    if(mode_fflechie){
     char * noun_type = generate_random_type(0); // Example "Mas+SG"
     char * sub_verb_type = (char*)malloc(5*sizeof(char)); 
     int founds = 0, cpt_noun =0, cpt_verb =0;
@@ -517,11 +471,11 @@ char * generate_modele1(t_tree * trees)
     char * noun2_flechie = malloc(50*sizeof(char));
 
     // Finding a noun that correcsponds to the type
-    noun1_flechie = finding_fflechie_corresponding_to_type(trees[0], noun_type_1);
+    noun1_flechie = finding_fflechie_corresponding_to_type(trees[NOM], noun_type_1);
     // Finding an adjective that correcsponds to the type
-    adj_flechie = finding_fflechie_corresponding_to_type(trees[1], adj_type);
+    adj_flechie = finding_fflechie_corresponding_to_type(trees[ADJ], adj_type);
     // Finding a verb that correcsponds to the type
-    verb_flechie = finding_fflechie_corresponding_to_type(trees[2], verb_type);
+    verb_flechie = finding_fflechie_corresponding_to_type(trees[VER], verb_type);
     //Finding a random second noun
     p_node tmp = trees[0].roots.head;
         int random = rand() % trees[0].roots.size;
@@ -552,9 +506,50 @@ char * generate_modele1(t_tree * trees)
     strcat(sentence, determinant_noun2);
     strcat(sentence, " ");
     strcat(sentence, noun2_flechie);
-    printf("%s\n", sentence);
+    printf("%s.\n", sentence);
 
-    return sentence;
+
+
+    }
+    else{
+        p_node tmp = trees[NOM].roots.head;
+        //printf("SIZE =%d", trees[NOM].roots.size);
+        int random = rand() % trees[NOM].roots.size;
+        for (int i = 0;i < random; i++)//Access to the root chosen randomly
+            tmp = tmp->next;
+        printf("%c", tmp->letter);
+        //printf("SIZE HELLO = %d", tmp->next_letters.size);
+        random_path(tmp, 1);
+
+        printf(" ");
+
+        tmp = trees[ADJ].roots.head;
+        random = rand() % trees[ADJ].roots.size;
+        for (int i = 0;i < random; i++)//Access to the root chosen randomly
+            tmp = tmp->next;
+        printf("%c", tmp->letter);
+        random_path(tmp, 1);
+
+        printf(" ");
+
+        tmp = trees[VER].roots.head;
+        random = rand() % trees[VER].roots.size;
+        for (int i = 0;i < random; i++)//Access to the root chosen randomly
+            tmp = tmp->next;
+        printf("%c", tmp->letter);
+        random_path(tmp, 1);
+
+        printf(" ");
+
+        tmp = trees[NOM].roots.head;
+        random = rand() % trees[NOM].roots.size;
+        for (int i = 0;i < random; i++)//Access to the root chosen randomly
+            tmp = tmp->next;
+        printf("%c", tmp->letter);
+        random_path(tmp, 1);
+        printf(".\n");
+    
+    }
     
 }
 

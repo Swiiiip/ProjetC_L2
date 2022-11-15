@@ -2,6 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef enum{
+    NOM= 0,
+    ADJ = 1,
+    ADV = 2,
+    VER = 3
+}CATEGORY;
+
+
+
 
 // Using forward declaration to avoid circular dependencies
 struct s_node; 
@@ -55,7 +64,7 @@ typedef struct s_tree
 
 //     FUNCTIONS FOR TREE MANIPULATION    //
 t_tree create_empty_tree();
-void fill_trees();
+t_tree* fill_trees();
 
 void print_tree_paths(t_ht_list_node roots);
 void print_node_paths(p_node node, char path[], int pathLen);
@@ -80,10 +89,12 @@ p_node create_node(char letter);
 
 
 char * generate_random_type(int mode);
-char * generate_modele1(t_tree * trees);
+void generate_modele1(t_tree * trees, int mode_fflechie);
 
 void print_fflechies(p_node leaf);
 
 char * finding_fflechie_corresponding_to_type(t_tree my_tree, int type);
 char * determinant_generator(int type);
 int is_type_in( int desired_type, int full_type);
+
+
