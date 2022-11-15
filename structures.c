@@ -241,10 +241,12 @@ void fill_trees()
             default :
                 break;
         }
+        
+
     }
 
-    t_tree t_trees[4] = {noun_tree, adj_tree, verb_tree, adv_tree};
-    generate_modele1(t_trees);
+    
+    
 
     
     fclose(dictionary);
@@ -525,7 +527,7 @@ char * generate_modele1(t_tree * trees)
         int random = rand() % trees[0].roots.size;
         for (int i = 0;i < random; i++)//Access to the root chosen randomly
             tmp = tmp->next;
-    p_node noun2 = random_path(tmp);
+    p_node noun2 = random_path(tmp, 0);
 
     int i = rand() % (noun2->fflechies.size);
     p_cell temp = noun2->fflechies.head;
@@ -550,7 +552,7 @@ char * generate_modele1(t_tree * trees)
     strcat(sentence, determinant_noun2);
     strcat(sentence, " ");
     strcat(sentence, noun2_flechie);
-    printf("%s", sentence);
+    printf("%s\n", sentence);
 
     return sentence;
     
@@ -566,7 +568,7 @@ char * finding_fflechie_corresponding_to_type(t_tree my_tree, int type){
         for (int i = 0;i < random; i++)//Access to the root chosen randomly
             tmp = tmp->next;
         
-        p_node categorie = random_path(tmp);
+        p_node categorie = random_path(tmp, 0);
         p_cell temp = categorie->fflechies.head;
         for(int i = 0; i< categorie->fflechies.size; i++){
     
