@@ -90,6 +90,7 @@ p_node create_node(char letter);
 
 char * generate_random_type(int mode);
 void generate_modele1(t_tree * trees, int mode_fflechie);
+void generate_modele2(t_tree * trees, int mode_fflechie);
 
 void print_fflechies(p_node leaf);
 

@@ -46,16 +46,18 @@ void generate_sentence(t_tree * my_trees)
            "3 - Not yet implemented\n\n");
     printf("Please choose a model (enter anything else to return to the main menu):\n>>> ");
     scanf("%d", &sentence_model);
+
+    printf("Please choose whether you want it in base form or contracted form:\n"
+                   "1 - Base form\n"
+                   "2 - Contracted form\n>>> ");
+
+    scanf("%d", &choice_form);
     switch (sentence_model)
     {
         
         case 1:
             
-            printf("Please choose whether you want it in base form or contracted form:\n"
-                   "1 - Base form\n"
-                   "2 - Contracted form\n>>> ");
-
-            scanf("%d", &choice_form);
+           
             if(choice_form == 1)
             {
                 generate_modele1(my_trees,0);
@@ -71,7 +73,18 @@ void generate_sentence(t_tree * my_trees)
 
             break;
         case 2:
-            //generate_modele2();
+            if(choice_form == 1)
+            {
+                generate_modele2(my_trees,0);
+            }
+            else if(choice_form == 2)
+            {
+                generate_modele2(my_trees,1);
+            }
+            else
+            {
+                printf("Invalid Input\n");
+            }
             break;
         case 3:
             //generate_modele3();
