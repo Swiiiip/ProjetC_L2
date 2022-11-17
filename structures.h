@@ -79,7 +79,13 @@ p_node create_node(char letter);
 
 
 char * generate_random_type(int mode);
+<<<<<<< Updated upstream
 char * generate_modele1(t_tree * trees);
+=======
+void generate_modele1(t_tree * trees, int mode_fflechie);
+void generate_modele2(t_tree * trees, int mode_fflechie);
+void generate_modele3(t_tree * trees, int mode_fflechie);
+>>>>>>> Stashed changes
 
 void print_fflechies(p_node leaf);
 
