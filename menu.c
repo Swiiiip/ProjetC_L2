@@ -4,12 +4,16 @@
 
 void main_menu(int user_input)
 {
+    
+    
     clock_t start, end;
     start = clock();
-    t_tree * my_trees = fill_trees();
-    int exit;
+    t_tree * my_trees =  fill_trees();
     end = clock() ;
     printf("\n\n=============================================\n Time taken for tree generation : %f s\n=============================================\n\n", (double)(end - start) / CLOCKS_PER_SEC); 
+    
+     
+    
     switch (user_input)
     {
         case 1:
@@ -82,39 +86,32 @@ void generate_sentence(t_tree * my_trees)
             
            
             if(choice_form == 1)
-            {
                 generate_modele1(my_trees,0);
-                getchar();
-            }
             else if(choice_form == 2)
-            {
                 generate_modele1(my_trees,1);
-                getchar();
-            }
             else
-            {
                 printf("Invalid Input\n");
-            }
 
             break;
         case 2:
+
             if(choice_form == 1)
-            {
                 generate_modele2(my_trees,0);
-                getchar();
-            }
             else if(choice_form == 2)
-            {
                 generate_modele2(my_trees,1);
-                getchar();
-            }
             else
-            {
                 printf("Invalid Input\n");
-            }
+
             break;
         case 3:
-            //generate_modele3();
+
+            if(choice_form == 1)
+                generate_modele3(my_trees,0);
+            else if(choice_form == 2)
+                generate_modele3(my_trees,1);
+            else
+                printf("Invalid Input\n");
+            
             break;
         default:
             break;
