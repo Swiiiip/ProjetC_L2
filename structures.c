@@ -162,8 +162,6 @@ void add_word(t_ht_list_node *the_root, char *fbase, char *fflechie, char *types
             
             p_cell my_cell = add_fflechie(fflechie, type);
             
-            
-
             if(my_cell!=NULL){
 
                 if(my_node->fflechies.head == NULL){ // checks if node has no fflechies yet
@@ -179,6 +177,7 @@ void add_word(t_ht_list_node *the_root, char *fbase, char *fflechie, char *types
         }
     }
 }
+
 
 t_tree create_empty_tree()
 {
@@ -319,14 +318,8 @@ void extract_random_fbase(t_tree mytree)
         tree_roots_size ++;
         tmp = tmp->next;
     }
-    tmp = mytree.roots.head;
-    int random = rand() % tree_roots_size;
-    for (int i = 0;i < random; i++)//Access to the root chosen randomly
-        tmp = tmp->next;
 
-
-    printf("\nThe word '%c",tmp->letter);
-    p_node last_node_fbase = random_path(tmp,1);
+    p_node last_node_fbase = random_path(mytree.roots,mytree.roots.head,1);
     printf("' is a base form. "); 
     print_fflechies(last_node_fbase);
 }
@@ -357,26 +350,20 @@ void print_fflechies(p_node leaf)
 }
 
 
-
+/*
 p_node random_path(p_node current, int print_path)
 {
-    //printf("I eneter the function");
-    if(current->fflechies.head != NULL)
+    if(current->fflechies.head != NULL || current->next_letters.head == NULL)
     {
-        //printf("I am a leaf");
-       
         if(rand() % number_paths(current) == 0 || current->next_letters.head == NULL){
-            //printf("test1 last letter");
             return current;
         }
     }        
     
-    //printf("test2 ");
     int random = rand() % current->next_letters.size;
     p_node temp = current->next_letters.head;
     for(int i = 0 ; i < random ; i++)
         temp = temp->next;
-        //printf("In the for");
     if(print_path)
     {
         printf("%c",temp->letter);
@@ -384,7 +371,27 @@ p_node random_path(p_node current, int print_path)
     }
     else 
         return random_path(temp,0);            
+}*/
 
+p_node random_path(t_ht_list_node current_list, p_node current_node, int print_path)
+{
+    if(current_node->fflechies.head != NULL || current_list.head == NULL)
+    {
+        if(rand() % number_paths(current_node) == 0 || current_list.head == NULL){//1 chance out of the number of paths to stop the path 
+            return current_node;
+        }
+    }        
+    
+    int random = rand() % current_list.size;
+    p_node temp = current_list.head;
+    for(int i = 0 ; i < random ; i++)
+        temp = temp->next;
+    if(print_path)
+    {
+        printf("%c",temp->letter);
+        return random_path(temp->next_letters,temp,1);
+    }
+    return random_path(temp->next_letters,temp,0);            
 }
 
 
@@ -435,118 +442,84 @@ char * generate_random_type(int mode){
 
 void generate_modele1(t_tree * trees, int mode_fflechie)
 {
-    if(mode_fflechie){
-    char * noun_type = generate_random_type(0); // Example "Mas+SG"
-    char * sub_verb_type = (char*)malloc(5*sizeof(char)); 
-    int founds = 0, cpt_noun =0, cpt_verb =0;
-    while(cpt_noun < strlen(noun_type)){
+    if(mode_fflechie)
+    {
+        char * noun_type = generate_random_type(0); // Example "Mas+SG"
+        char * sub_verb_type = (char*)malloc(5*sizeof(char)); 
+        int founds = 0, cpt_noun =0, cpt_verb =0;
+        while(cpt_noun < strlen(noun_type)){
 
-        if (founds == 1){
-            sub_verb_type[cpt_verb] = noun_type[cpt_noun];
-            cpt_verb++;
+            if (founds == 1){
+                sub_verb_type[cpt_verb] = noun_type[cpt_noun];
+                cpt_verb++;
+            }
+
+            if('+' == noun_type[cpt_noun]){
+                founds++;
+            }
+            if(founds == 2){
+                break;
+            }
+            cpt_noun++;
         }
 
-        if('+' == noun_type[cpt_noun]){
-            founds++;
+        if(!strcmp(sub_verb_type, "InvPL")){
+            strcpy(sub_verb_type, "SG");
         }
-        if(founds == 2){
-            break;
-        }
-        cpt_noun++;
-    }
+        
+        int noun_type_1 = conversion_type(noun_type);
+        int adj_type = noun_type_1;
+        strcat(sub_verb_type, "+P3");
+        int verb_type = conversion_type(sub_verb_type);
+        //int verb_type = conversion_type(random_type);
 
-    if(!strcmp(sub_verb_type, "InvPL")){
-        strcpy(sub_verb_type, "SG");
-    }
-    
-    int noun_type_1 = conversion_type(noun_type);
-    int adj_type = noun_type_1;
-    strcat(sub_verb_type, "+P3");
-    int verb_type = conversion_type(sub_verb_type);
-    //int verb_type = conversion_type(random_type);
+        char * noun1_flechie = malloc(50*sizeof(char));
+        char * adj_flechie = malloc(50*sizeof(char));
+        char * verb_flechie = malloc(50*sizeof(char));
+        char * noun2_flechie = malloc(50*sizeof(char));
 
-    char * noun1_flechie = malloc(50*sizeof(char));
-    char * adj_flechie = malloc(50*sizeof(char));
-    char * verb_flechie = malloc(50*sizeof(char));
-    char * noun2_flechie = malloc(50*sizeof(char));
+        // Finding a noun that correcsponds to the type
+        noun1_flechie = finding_fflechie_corresponding_to_type(trees[NOM], noun_type_1);
+        // Finding an adjective that correcsponds to the type
+        adj_flechie = finding_fflechie_corresponding_to_type(trees[ADJ], adj_type);
+        // Finding a verb that correcsponds to the type
+        verb_flechie = finding_fflechie_corresponding_to_type(trees[VER], verb_type);
+        //Finding a random second noun
+        p_node noun2 = random_path(trees[0].roots, trees[0].roots.head, 0);
+        
+        int i = rand() % (noun2->fflechies.size);
+        p_cell temp = noun2->fflechies.head;
+        for(int j = 0; j < i; j++)
+            temp = temp->next;
 
-    // Finding a noun that correcsponds to the type
-    noun1_flechie = finding_fflechie_corresponding_to_type(trees[NOM], noun_type_1);
-    // Finding an adjective that correcsponds to the type
-    adj_flechie = finding_fflechie_corresponding_to_type(trees[ADJ], adj_type);
-    // Finding a verb that correcsponds to the type
-    verb_flechie = finding_fflechie_corresponding_to_type(trees[VER], verb_type);
-    //Finding a random second noun
-    p_node tmp = trees[0].roots.head;
-        int random = rand() % trees[0].roots.size;
-        for (int i = 0;i < random; i++)//Access to the root chosen randomly
-            tmp = tmp->next;
-    p_node noun2 = random_path(tmp, 0);
+        noun2_flechie = temp->forme_flechie;
+        int noun_type_2 = temp->number_type; // Used for the determinant of the second noun
 
-    int i = rand() % (noun2->fflechies.size);
-    p_cell temp = noun2->fflechies.head;
-    for(int j = 0; j < i; j++)
-        temp = temp->next;
+        char * determinant_noun1 = determinant_generator(noun_type_1);
+        char * determinant_noun2 = determinant_generator(noun_type_2);
 
-    noun2_flechie = temp->forme_flechie;
-    int noun_type_2 = temp->number_type; // Used for the determinant of the second noun
-
-    char * determinant_noun1 = determinant_generator(noun_type_1);
-    char * determinant_noun2 = determinant_generator(noun_type_2);
-
-    char * sentence = (char*)malloc(100*sizeof(char));
-    strcpy(sentence, determinant_noun1);
-    strcat(sentence, " ");
-    strcat(sentence, noun1_flechie);
-    strcat(sentence, " ");
-    strcat(sentence, adj_flechie);
-    strcat(sentence, " ");
-    strcat(sentence, verb_flechie);
-    strcat(sentence, " ");
-    strcat(sentence, determinant_noun2);
-    strcat(sentence, " ");
-    strcat(sentence, noun2_flechie);
-    printf("%s.\n", sentence);
-
-
-
+        char * sentence = (char*)malloc(100*sizeof(char));
+        strcpy(sentence, determinant_noun1);
+        strcat(sentence, " ");
+        strcat(sentence, noun1_flechie);
+        strcat(sentence, " ");
+        strcat(sentence, adj_flechie);
+        strcat(sentence, " ");
+        strcat(sentence, verb_flechie);
+        strcat(sentence, " ");
+        strcat(sentence, determinant_noun2);
+        strcat(sentence, " ");
+        strcat(sentence, noun2_flechie);
+        printf("%s.\n", sentence);
     }
     else{
-        p_node tmp = trees[NOM].roots.head;
-        //printf("SIZE =%d", trees[NOM].roots.size);
-        int random = rand() % trees[NOM].roots.size;
-        for (int i = 0;i < random; i++)//Access to the root chosen randomly
-            tmp = tmp->next;
-        printf("%c", tmp->letter);
-        //printf("SIZE HELLO = %d", tmp->next_letters.size);
-        random_path(tmp, 1);
-
+        random_path(trees[NOM].roots, trees[NOM].roots.head, 1);
         printf(" ");
-
-        tmp = trees[ADJ].roots.head;
-        random = rand() % trees[ADJ].roots.size;
-        for (int i = 0;i < random; i++)//Access to the root chosen randomly
-            tmp = tmp->next;
-        printf("%c", tmp->letter);
-        random_path(tmp, 1);
-
+        random_path(trees[ADJ].roots, trees[ADJ].roots.head, 1);
         printf(" ");
-
-        tmp = trees[VER].roots.head;
-        random = rand() % trees[VER].roots.size;
-        for (int i = 0;i < random; i++)//Access to the root chosen randomly
-            tmp = tmp->next;
-        printf("%c", tmp->letter);
-        random_path(tmp, 1);
-
+        random_path(trees[VER].roots, trees[VER].roots.head, 1);
         printf(" ");
-
-        tmp = trees[NOM].roots.head;
-        random = rand() % trees[NOM].roots.size;
-        for (int i = 0;i < random; i++)//Access to the root chosen randomly
-            tmp = tmp->next;
-        printf("%c", tmp->letter);
-        random_path(tmp, 1);
+        random_path(trees[NOM].roots, trees[NOM].roots.head, 1);
         printf(".\n");
     
     }
@@ -555,126 +528,90 @@ void generate_modele1(t_tree * trees, int mode_fflechie)
 
 void generate_modele2(t_tree * trees, int mode_fflechie){
 
-    if(mode_fflechie){
-    char * noun_type = generate_random_type(0); // Example "Mas+SG"
-    char * noun_type2 = generate_random_type(0); // Example "Fem+SG"
+    if(mode_fflechie)
+    {
+        char * noun_type = generate_random_type(0); // Example "Mas+SG"
+        char * noun_type2 = generate_random_type(0); // Example "Fem+SG"
 
-    char * sub_verb_type = (char*)malloc(5*sizeof(char)); 
-    int founds = 0, cpt_noun =0, cpt_verb =0;
-    while(cpt_noun < strlen(noun_type)){
+        char * sub_verb_type = (char*)malloc(5*sizeof(char)); 
+        int founds = 0, cpt_noun =0, cpt_verb =0;
+        while(cpt_noun < strlen(noun_type))
+        {
+            if (founds == 1){
+                sub_verb_type[cpt_verb] = noun_type[cpt_noun];
+                cpt_verb++;
+            }
 
-        if (founds == 1){
-            sub_verb_type[cpt_verb] = noun_type[cpt_noun];
-            cpt_verb++;
+            if('+' == noun_type[cpt_noun]){
+                founds++;
+            }
+            if(founds == 2){
+                break;
+            }
+            cpt_noun++;
         }
 
-        if('+' == noun_type[cpt_noun]){
-            founds++;
+        if(!strcmp(sub_verb_type, "InvPL"))
+        {
+            strcpy(sub_verb_type, "SG");
         }
-        if(founds == 2){
-            break;
-        }
-        cpt_noun++;
-    }
-
-    if(!strcmp(sub_verb_type, "InvPL")){
-        strcpy(sub_verb_type, "SG");
-    }
-    strcat(sub_verb_type, "+P3");
-    
-    int noun_type_1 = conversion_type(noun_type);
-    int noun_type_2 = conversion_type(noun_type2);
-    int adj_type = noun_type_2;
-    int verb_type = conversion_type(sub_verb_type);
-    //int verb_type = conversion_type(random_type);
-
-    char * noun1_flechie = malloc(50*sizeof(char));
-    char * verb1_flechie = malloc(50*sizeof(char));
-    char * verb2_flechie = malloc(50*sizeof(char));
-    char * noun2_flechie = malloc(50*sizeof(char));
-    char * adj_flechie = malloc(50*sizeof(char));
-    
-
-    // Finding a noun that correcsponds to the type
-    noun1_flechie = finding_fflechie_corresponding_to_type(trees[NOM], noun_type_1);
-    // Finding a verb that correcsponds to the type
-    verb1_flechie = finding_fflechie_corresponding_to_type(trees[VER], verb_type);
-    // Finding a second verb that correcsponds to the type
-    verb2_flechie = finding_fflechie_corresponding_to_type(trees[VER], verb_type);
-    // Finding a second noun that correcsponds to another ranodm type
-    noun2_flechie = finding_fflechie_corresponding_to_type(trees[NOM], noun_type_2);
-    // Finding an adjective that correcsponds to the type
-    adj_flechie = finding_fflechie_corresponding_to_type(trees[ADJ], adj_type);
-
-    char * determinant_noun1 = determinant_generator(noun_type_1);
-    char * determinant_noun2 = determinant_generator(noun_type_2);
-
-    char * sentence = (char*)malloc(100*sizeof(char));
-    strcpy(sentence, determinant_noun1);
-    strcat(sentence, " ");
-    strcat(sentence, noun1_flechie);
-    strcat(sentence, " qui ");
-    strcat(sentence, verb1_flechie);
-    strcat(sentence, " ");
-    strcat(sentence, verb2_flechie);
-    strcat(sentence, " ");
-    strcat(sentence, determinant_noun2);
-    strcat(sentence, " ");
-    strcat(sentence, noun2_flechie);
-    strcat(sentence, " ");
-    strcat(sentence, adj_flechie);
-    printf("%s.\n", sentence);
-
-
-
-    }
-    else{
-
-        p_node tmp = trees[NOM].roots.head;
-        int random = rand() % trees[NOM].roots.size;
-        for (int i = 0;i < random; i++)//Access to the root chosen randomly
-            tmp = tmp->next;
-        printf("%c", tmp->letter);
-        random_path(tmp, 1);
-
-        printf(" qui ");
-
-        tmp = trees[VER].roots.head;
-        random = rand() % trees[VER].roots.size;
-        for (int i = 0;i < random; i++)//Access to the root chosen randomly
-            tmp = tmp->next;
-        printf("%c", tmp->letter);
-        random_path(tmp, 1);
-
-        printf(" ");
-
-        tmp = trees[VER].roots.head;
-        random = rand() % trees[VER].roots.size;
-        for (int i = 0;i < random; i++)//Access to the root chosen randomly
-            tmp = tmp->next;
-        printf("%c", tmp->letter);
-        random_path(tmp, 1);
-
-        printf(" ");
-
-        tmp = trees[NOM].roots.head;
-        random = rand() % trees[NOM].roots.size;
-        for (int i = 0;i < random; i++)//Access to the root chosen randomly
-            tmp = tmp->next;
-        printf("%c", tmp->letter);
-        random_path(tmp, 1);
+        strcat(sub_verb_type, "+P3");
         
+        int noun_type_1 = conversion_type(noun_type);
+        int noun_type_2 = conversion_type(noun_type2);
+        int adj_type = noun_type_2;
+        int verb_type = conversion_type(sub_verb_type);
+        //int verb_type = conversion_type(random_type);
+
+        char * noun1_flechie = malloc(50*sizeof(char));
+        char * verb1_flechie = malloc(50*sizeof(char));
+        char * verb2_flechie = malloc(50*sizeof(char));
+        char * noun2_flechie = malloc(50*sizeof(char));
+        char * adj_flechie = malloc(50*sizeof(char));
+        
+
+        // Finding a noun that correcsponds to the type
+        noun1_flechie = finding_fflechie_corresponding_to_type(trees[NOM], noun_type_1);
+        // Finding a verb that correcsponds to the type
+        verb1_flechie = finding_fflechie_corresponding_to_type(trees[VER], verb_type);
+        // Finding a second verb that correcsponds to the type
+        verb2_flechie = finding_fflechie_corresponding_to_type(trees[VER], verb_type);
+        // Finding a second noun that correcsponds to another ranodm type
+        noun2_flechie = finding_fflechie_corresponding_to_type(trees[NOM], noun_type_2);
+        // Finding an adjective that correcsponds to the type
+        adj_flechie = finding_fflechie_corresponding_to_type(trees[ADJ], adj_type);
+
+        char * determinant_noun1 = determinant_generator(noun_type_1);
+        char * determinant_noun2 = determinant_generator(noun_type_2);
+
+        char * sentence = (char*)malloc(100*sizeof(char));
+        strcpy(sentence, determinant_noun1);
+        strcat(sentence, " ");
+        strcat(sentence, noun1_flechie);
+        strcat(sentence, " qui ");
+        strcat(sentence, verb1_flechie);
+        strcat(sentence, " ");
+        strcat(sentence, verb2_flechie);
+        strcat(sentence, " ");
+        strcat(sentence, determinant_noun2);
+        strcat(sentence, " ");
+        strcat(sentence, noun2_flechie);
+        strcat(sentence, " ");
+        strcat(sentence, adj_flechie);
+        printf("%s.\n", sentence);
+    }
+    else
+    {
+        random_path(trees[NOM].roots,trees[NOM].roots.head, 1);
+        printf(" qui ");      
+        random_path(trees[VER].roots,trees[VER].roots.head, 1);
         printf(" ");
-
-        tmp = trees[ADJ].roots.head;
-        random = rand() % trees[ADJ].roots.size;
-        for (int i = 0;i < random; i++)//Access to the root chosen randomly
-            tmp = tmp->next;
-        printf("%c", tmp->letter);
-        random_path(tmp, 1);
-
+        random_path(trees[VER].roots,trees[VER].roots.head, 1);
+        printf(" ");
+        random_path(trees[NOM].roots,trees[NOM].roots.head, 1);
+        printf(" ");
+        random_path(trees[ADJ].roots,trees[ADJ].roots.head, 1);
         printf(".\n");
-    
     }
 
 }
@@ -684,17 +621,12 @@ char * finding_fflechie_corresponding_to_type(t_tree my_tree, int type){
     int found = 0;
     while(!found)
     {
-        p_node tmp = my_tree.roots.head;
-        int random = rand() % my_tree.roots.size;
-        for (int i = 0;i < random; i++)//Access to the root chosen randomly
-            tmp = tmp->next;
-        
-        p_node categorie = random_path(tmp, 0);
+        p_node categorie = random_path(my_tree.roots, my_tree.roots.head, 0);
         p_cell temp = categorie->fflechies.head;
         for(int i = 0; i< categorie->fflechies.size; i++){
     
-            if(is_type_in(type, temp->number_type)){
-
+            if(is_type_in(type, temp->number_type))
+            {
                 found = 1;
                 fflechie = temp->forme_flechie;
                 break;

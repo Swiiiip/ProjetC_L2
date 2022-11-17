@@ -75,7 +75,7 @@ p_node add_fbase(t_ht_list_node * siblings, p_node my_node, char * f_base, int i
 void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *type);
 void search_fbase(t_ht_list_node roots, char *fbase, int index);
 void extract_random_fbase(t_tree);
-p_node random_path(p_node, int);
+p_node random_path(t_ht_list_node, p_node, int);
 
 //    USEFUL FUNCTIONS    //
 int conversion_type(char* type);
