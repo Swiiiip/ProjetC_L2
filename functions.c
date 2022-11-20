@@ -249,3 +249,31 @@ char *conversion_string(int type, int mode){
    
 }
 
+
+char * generate_random_type(int mode){
+
+    char * type = malloc(18*sizeof(char));
+ 
+    char random_subtype1 [][7]= {"Mas","Fem","InvGen"};
+    int index1 = rand() % 3;
+    char random_subtype2[][6] = {"SG","PL","InvPL"};
+    int index2 = rand() % 3;
+
+    strcpy(type, random_subtype1[index1]);
+    strcat(type, "+");
+    strcat(type,random_subtype2[index2]);
+    
+   
+    if(mode == 1){
+    char random_subtype3[][3] = {"P1","P2", "P3"};
+    int index3 = rand() % 3;
+    char random_subtype4[][5] = {"Inf","IImp", "IPre", "SPre"};
+    int index4 = rand() % 4;
+    strcat(type, "+");
+    strcat(type,random_subtype3[index3]);
+    strcat(type, "+");
+    strcat(type,random_subtype4[index4]);
+    }
+    return type;
+    
+}

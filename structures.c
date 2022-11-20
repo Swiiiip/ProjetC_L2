@@ -5,88 +5,49 @@
 #define CATEGORY_SIZE 4
 const char* categories[CATEGORY_SIZE]={"Nom","Adj","Adv","Ver"};
 
-//Initialisation of a node and of its fields
-p_node create_node(char character)
-{
-    p_node mynode = malloc(sizeof(t_node));
-    
-    mynode->next = NULL;
-    mynode->letter = character;
 
-    mynode->fflechies.head = NULL;
-    mynode->fflechies.tail = NULL;
-    mynode->fflechies.size = 0;
-
-    mynode->next_letters.head = NULL;
-    mynode->next_letters.tail = NULL;
-    mynode->next_letters.size = 0;
+//Calls all functions necessary to fully extract the dictionary into a tree
+t_tree* fill_trees()
+{   
+    //Creation of the array of trees
+    t_tree* trees = malloc(CATEGORY_SIZE*sizeof(t_tree));
     
-    return mynode;
+    for(int i=0; i<CATEGORY_SIZE ; i++)
+        trees[i] = create_empty_tree();
+
+    //Reading of the file line by line
+    char line[110];
+    char* f_flechie, *f_base, *category, *type;
+    FILE *dictionary;
+
+    //Opening of the file
+    //dictionary = fopen("dictionnaire.txt","r");
+    //dictionary = fopen("minidictionnary.txt","r");
+    dictionary = fopen("dictionnaire_non_accentue.txt","r");
+
+    //The while returns each line one by one as a string, line 
+    while(fgets(line,110,dictionary))
+    {   
+        split_line(line, &f_flechie, &f_base, &category, &type);
+    
+        //Now that we have each information of a line into the correct variables, we add it to the correct tree
+        for(int i = 0 ; i < CATEGORY_SIZE ; i++)
+            if (!strcmp(categories[i],category))//Looks if the category we have is among the $CATEGORY_SIZE we consider
+                add_word(&(trees[i].roots), f_base, f_flechie, type);
+    }
+    fclose(dictionary);
+    return trees;//We return the array of trees to be able to use them everywhere
 }
 
-//Looks in a t_ht_list for a specific letter and returns the p_node containing it
-p_node search_letter(t_ht_list_node siblings, char letter)
+//Initialize an empty tree with all its fields
+t_tree create_empty_tree()
 {
-    p_node temp = siblings.head;
-    while(temp != NULL)
-    {
-        if(temp->letter == letter)
-            return temp;
-        temp = temp->next;
-    }
-    return NULL;//returns NULL if the letter is not found
-}
+    t_tree mytree;
+    mytree.roots.head = NULL;
+    mytree.roots.tail = NULL;
+    mytree.roots.size = 0;
+    return mytree;
 
-//Add a base form to the tree and returns the node containing the last letter of the word
-p_node add_fbase(t_ht_list_node * siblings, p_node my_node,char * f_base, int index)
-{
-    if(f_base[index] == '\0'){//If the end of the word is reached, we set its fields at NULL
-        my_node->next_letters.head = NULL;
-        my_node->next_letters.tail = NULL;
-        my_node->next_letters.size = 0;
-        return my_node;
-    }
-
-    p_node temp = search_letter(*siblings, f_base[index]);//We look for the letter in the list of siblings
-    if(temp == NULL)//If the letter was not found
-    {
-        temp = create_node(f_base[index]);//Create the corresponding node to add
-        if(siblings->head == NULL)//Add it at the head if the list was empty 
-        {
-            siblings->head = temp;
-            siblings->tail = temp;
-            siblings->size = 1;
-        }
-        else//Or at the tail if not
-        {
-            siblings->tail->next = temp;
-            siblings->tail = temp;
-            siblings->size ++;
-        }
-    }
-    add_fbase(&(temp->next_letters), temp, f_base, index + 1);//Recursive call to add the next letter of the word
-}
-
-//create a cell containing all the contracted forms
-p_cell add_fflechie(char* fflechie, char* type){
-
-    int type_int = conversion_type(type,1);//Encoding of the type
-    
-    if(type_int == -1) //exclude forbidden typed p_cell
-        return NULL;
-
-    else{
-        //create cell for fflechie
-        p_cell my_cell = (p_cell)malloc(sizeof(t_cell));
-
-        my_cell->forme_flechie = (char*)malloc(sizeof(char) * (strlen(fflechie) + 1));
-        strcpy(my_cell->forme_flechie, fflechie);
-
-        my_cell->number_type = type_int;
-        my_cell->next = NULL;
-
-        return my_cell;
-    }
 }
 
 //Add a word to the tree with its base form and its contracted forms
@@ -123,48 +84,88 @@ void add_word(t_ht_list_node *the_root, char *fbase, char *fflechie, char *types
     
 }
 
-//Initialize an empty tree with all its fields
-t_tree create_empty_tree()
+//Add a base form to the tree and returns the node containing the last letter of the word
+p_node add_fbase(t_ht_list_node * siblings, p_node my_node,char * f_base, int index)
 {
-    t_tree mytree;
-    mytree.roots.head = NULL;
-    mytree.roots.tail = NULL;
-    mytree.roots.size = 0;
-    return mytree;
+    if(f_base[index] == '\0'){//If the end of the word is reached, we set its fields at NULL
+        my_node->next_letters.head = NULL;
+        my_node->next_letters.tail = NULL;
+        my_node->next_letters.size = 0;
+        return my_node;
+    }
 
+    p_node temp = search_letter(*siblings, f_base[index]);//We look for the letter in the list of siblings
+    if(temp == NULL)//If the letter was not found
+    {
+        temp = create_node(f_base[index]);//Create the corresponding node to add
+        if(siblings->head == NULL)//Add it at the head if the list was empty 
+        {
+            siblings->head = temp;
+            siblings->tail = temp;
+            siblings->size = 1;
+        }
+        else//Or at the tail if not
+        {
+            siblings->tail->next = temp;
+            siblings->tail = temp;
+            siblings->size ++;
+        }
+    }
+    add_fbase(&(temp->next_letters), temp, f_base, index + 1);//Recursive call to add the next letter of the word
 }
 
-//Calls all functions necessary to fully extract the dictionary into a tree
-t_tree* fill_trees()
-{   
-    //Creation of the array of trees
-    t_tree* trees = malloc(CATEGORY_SIZE*sizeof(t_tree));
+//Initialisation of a node and of its fields
+p_node create_node(char character)
+{
+    p_node mynode = malloc(sizeof(t_node));
     
-    for(int i=0; i<CATEGORY_SIZE ; i++)
-        trees[i] = create_empty_tree();
+    mynode->next = NULL;
+    mynode->letter = character;
 
-    //Reading of the file line by line
-    char line[110];
-    char* f_flechie, *f_base, *category, *type;
-    FILE *dictionary;
+    mynode->fflechies.head = NULL;
+    mynode->fflechies.tail = NULL;
+    mynode->fflechies.size = 0;
 
-    //Opening of the file
-    //dictionary = fopen("dictionnaire.txt","r");
-    //dictionary = fopen("minidictionnary.txt","r");
-    dictionary = fopen("dictionnaire_non_accentue.txt","r");
-
-    //The while returns each line one by one as a string, line 
-    while(fgets(line,110,dictionary))
-    {   
-        split_line(line, &f_flechie, &f_base, &category, &type);
+    mynode->next_letters.head = NULL;
+    mynode->next_letters.tail = NULL;
+    mynode->next_letters.size = 0;
     
-        //Now that we have each information of a line into the correct variables, we add it to the correct tree
-        for(int i = 0 ; i < CATEGORY_SIZE ; i++)
-            if (!strcmp(categories[i],category))//Looks if the category we have is among the $CATEGORY_SIZE we consider
-                add_word(&(trees[i].roots), f_base, f_flechie, type);
+    return mynode;
+}
+
+//Looks in a t_ht_list for a specific letter and returns the p_node containing it
+p_node search_letter(t_ht_list_node siblings, char letter)
+{
+    p_node temp = siblings.head;
+    while(temp != NULL)
+    {
+        if(temp->letter == letter)
+            return temp;
+        temp = temp->next;
     }
-    fclose(dictionary);
-    return trees;//We return the array of trees to be able to use them everywhere
+    return NULL;//returns NULL if the letter is not found
+}
+
+//create a cell containing all the contracted forms
+p_cell add_fflechie(char* fflechie, char* type){
+
+    int type_int = conversion_type(type,1);//Encoding of the type
+    
+    if(type_int == -1) //exclude forbidden typed p_cell
+        return NULL;
+
+    else{
+        //create cell for fflechie
+        p_cell my_cell = (p_cell)malloc(sizeof(t_cell));
+
+        my_cell->forme_flechie = (char*)malloc(sizeof(char) * (strlen(fflechie) + 1));
+        strcpy(my_cell->forme_flechie, fflechie);
+
+        my_cell->number_type = type_int;
+        my_cell->next = NULL;
+
+        return my_cell;
+    }
 }
 
 //Developper-destined function to display all words in the tree
@@ -356,34 +357,7 @@ int number_paths(p_node current)
     }
 }
 
-
-char * generate_random_type(int mode){
-
-    char * type = malloc(18*sizeof(char));
- 
-    char random_subtype1 [][7]= {"Mas","Fem","InvGen"};
-    int index1 = rand() % 3;
-    char random_subtype2[][6] = {"SG","PL","InvPL"};
-    int index2 = rand() % 3;
-
-    strcpy(type, random_subtype1[index1]);
-    strcat(type, "+");
-    strcat(type,random_subtype2[index2]);
-    
-   
-    if(mode == 1){
-    char random_subtype3[][3] = {"P1","P2", "P3"};
-    int index3 = rand() % 3;
-    char random_subtype4[][5] = {"Inf","IImp", "IPre", "SPre"};
-    int index4 = rand() % 4;
-    strcat(type, "+");
-    strcat(type,random_subtype3[index3]);
-    strcat(type, "+");
-    strcat(type,random_subtype4[index4]);
-    }
-    return type;
-    
-}
+//      SENTENCE GENERATION FUNCTIONS       //
 
 
 void generate_modele1(t_tree * trees, int mode_fflechie)
