@@ -17,7 +17,7 @@ void main_menu(t_tree * my_trees)
            "3 - Check if a word of your choice is in our dictionary, and add it if it isn't\n"
            "4 - Exit\n>>> ");
     gets(user_input);
-    choice = intVerify(0, 3, user_input);//This is used in every input to verify it
+    //choice = intVerify(0, 3, user_input);//This is used in every input to verify it
     }while(choice == -1);
 
     switch (choice)
@@ -239,34 +239,32 @@ void search_and_add_word(t_tree *my_trees)
     else if(choice_type == 2)//Looking for a contracted form
     {
         int found = 0;
-        char* fbase_array = malloc(sizeof(char)* 30);
-        strcpy(fbase_array, "");//Prepare the array to store the base form corresponding to the contracted form we're searching
         switch (choice_tree)
         {
             case 1:
             {
-                search_fflechie(my_trees[NOM].roots, word, &found, fbase_array);//Search for the word in the correct tree
+                search_fflechie(my_trees[NOM].roots, word, &found);//Search for the word in the correct tree
                 if (!found)//If the word isn't in the tree
                     add_word_if_not_found(my_trees[NOM].roots, word, 0);//Add it to the tree with the 0 indicating it's a contracted form
                 break;
             }
             case 2:
             {
-                search_fflechie(my_trees[ADJ].roots, word, &found, fbase_array);
+                search_fflechie(my_trees[ADJ].roots, word, &found);
                 if (!found)
                     add_word_if_not_found(my_trees[ADJ].roots, word, 0);
                 break;
             }
             case 3:
             {
-                search_fflechie(my_trees[ADV].roots, word, &found, fbase_array);
+                search_fflechie(my_trees[ADV].roots, word, &found);
                 if (!found)
                     add_word_if_not_found(my_trees[ADV].roots, word, 0);
                 break;
             }
             case 4:
             {
-                search_fflechie(my_trees[VER].roots, word, &found, fbase_array);
+                search_fflechie(my_trees[VER].roots, word, &found);
                 if(!found)
                     add_word_if_not_found(my_trees[VER].roots, word, 0);
                 break;

@@ -75,14 +75,13 @@ p_cell add_fflechie(char* fflechie, char* types);
 p_node add_fbase(t_ht_list_node * siblings, p_node my_node, char * f_base, int index);
 void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *type);
 int search_fbase(t_ht_list_node roots, char *fbase, int index);
-void search_fflechie(t_ht_list_node roots, char *fflechie, int*, char *fbase_arrayt);
+void search_fflechie(t_ht_list_node roots, char *fflechie, int*);
 void extract_random_fbase(t_tree);
 p_node random_path(t_ht_list_node, p_node, int);
 void add_word_if_not_found(t_ht_list_node roots, char *given, int is_fbase);
 
 //    USEFUL FUNCTIONS    //
 p_node search_letter(t_ht_list_node mylist, char letter);
-void print_fflechies(p_node leaf);
 int number_paths(p_node current);
 
 //    FUNCTIONS FOR NODE MANIPULATION    //
@@ -95,7 +94,7 @@ void generate_modele1(t_tree * trees, int mode_fflechie);
 void generate_modele2(t_tree * trees, int mode_fflechie);
 void generate_modele3(t_tree * trees, int mode_fflechie);
 
-void print_fflechies(p_node leaf);
+void print_fflechies(p_node leaf, int is_fflechie);
 
 char * finding_fflechie_corresponding_to_type(t_tree my_tree, int type);
 char * determinant_generator(int type);

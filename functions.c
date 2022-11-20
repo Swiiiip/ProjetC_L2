@@ -147,8 +147,7 @@ int conversion_type(char* type, int mode){
 }
 
 
-
-char * conversion_string(int type, int mode){
+char *conversion_string(int type, int mode){
  
     char * type_string = (char*)malloc(100 * sizeof(char));
    
@@ -238,7 +237,7 @@ char * conversion_string(int type, int mode){
             strcat(type_string_sentence, "du ");
             strcat(type_string_sentence, SGPL);
         }else {
-            strcat(type_string_sentence, "Since it is an adverb, it doesn't have any 'formes fléchies'.\0");
+            strcat(type_string_sentence, "adverb.\0");
            
         }
         strcat(type_string_sentence, "\0");
