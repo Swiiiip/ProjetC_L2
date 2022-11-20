@@ -1,6 +1,7 @@
 #include "structures.h"
 
-void main_menu(int);
-void title(char *title);
-void generate_sentence(t_tree * my_trees);
-void extract_random_word();
+void main_menu(t_tree *);
+void generate_sentence(t_tree *);
+void extract_random_word(t_tree*);
+void search_and_add_word(t_tree*);
+void title(char *);

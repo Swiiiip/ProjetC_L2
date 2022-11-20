@@ -1,11 +1,11 @@
 #include "structures.h"
-#include "functions.h"
 #include <math.h>
 #include <stdlib.h>
 
 #define CATEGORY_SIZE 4
 const char* categories[CATEGORY_SIZE]={"Nom","Adj","Adv","Ver"};
 
+//Initialisation of a node and of its fields
 p_node create_node(char character)
 {
     p_node mynode = malloc(sizeof(t_node));
@@ -24,6 +24,7 @@ p_node create_node(char character)
     return mynode;
 }
 
+//Looks in a t_ht_list for a specific letter and returns the p_node containing it
 p_node search_letter(t_ht_list_node siblings, char letter)
 {
     p_node temp = siblings.head;
@@ -33,114 +34,48 @@ p_node search_letter(t_ht_list_node siblings, char letter)
             return temp;
         temp = temp->next;
     }
-    return NULL;
+    return NULL;//returns NULL if the letter is not found
 }
 
+//Add a base form to the tree and returns the node containing the last letter of the word
 p_node add_fbase(t_ht_list_node * siblings, p_node my_node,char * f_base, int index)
 {
-    if(f_base[index] == '\0'){
+    if(f_base[index] == '\0'){//If the end of the word is reached, we set its fields at NULL
         my_node->next_letters.head = NULL;
         my_node->next_letters.tail = NULL;
         my_node->next_letters.size = 0;
         return my_node;
     }
 
-    p_node temp = search_letter(*siblings, f_base[index]);
-    if(temp == NULL)
+    p_node temp = search_letter(*siblings, f_base[index]);//We look for the letter in the list of siblings
+    if(temp == NULL)//If the letter was not found
     {
-        temp = create_node(f_base[index]);
-        if(siblings->head == NULL)
+        temp = create_node(f_base[index]);//Create the corresponding node to add
+        if(siblings->head == NULL)//Add it at the head if the list was empty 
         {
             siblings->head = temp;
             siblings->tail = temp;
             siblings->size = 1;
         }
-        else
+        else//Or at the tail if not
         {
             siblings->tail->next = temp;
             siblings->tail = temp;
             siblings->size ++;
         }
     }
-    add_fbase(&(temp->next_letters), temp, f_base, index + 1);
+    add_fbase(&(temp->next_letters), temp, f_base, index + 1);//Recursive call to add the next letter of the word
 }
 
-int conversion_type(char* type){
-    int type_int = 0;
-    
-    char * temp = (char*)malloc((strlen(type)+1) * sizeof(char));
-    strcpy(temp, type);
-    char* subtype, *token = strtok(temp, "+");
-    
-    while(token != NULL){
-        subtype = token;
-        token = strtok(NULL, "+");
-            
-        // Binary table for type conversion : 
-        // +--------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
-        // |   10   |   9   |   8   |   7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
-        // +--------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
-        // |  Inf   | IImp  | IPre  | SPre  |  P1   |  P2   |  P3   |  PL   |  SG   |  Fem  |  Mas  |
-        // +--------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
-
-        if(!strcmp(subtype, "InvGen")){
-
-            int random = rand() % 2;
-            if(random)
-                type_int += 2;
-            else
-                type_int += 1;
-        }
-        else if(!strcmp(subtype, "Mas"))
-            type_int += 1;
-        else if(!strcmp(subtype, "Fem"))
-            type_int += 2;
-
-        else if(!strcmp(subtype, "InvPL"))
-            type_int += 4 + 8;
-        else if(!strcmp(subtype, "SG"))
-            type_int += 4;
-        else if(!strcmp(subtype, "PL"))
-            type_int += 8;
-
-        else if(!strcmp(subtype, "P3"))
-            type_int += 16;
-        else if(!strcmp(subtype, "P2"))
-            type_int += 32;
-        else if(!strcmp(subtype, "P1"))
-            type_int += 64;
-
-        else if(!strcmp(subtype, "SPre"))
-            type_int += 128;
-        else if(!strcmp(subtype, "IPre"))
-            type_int += 256;
-        else if(!strcmp(subtype, "IImp"))
-            type_int += 512;
-        else if(!strcmp(subtype, "Inf")){
-            type_int += 1024;
-            break;
-        }
-
-        else{ // for errors, unknown types, or excluded types
-            type_int = -1;
-            //printf("%s : Unknown subtype : %s\n", fflechie, subtype);
-            break;
-        } 
-    
-    }
-
-    return type_int;
-}
-
+//create a cell containing all the contracted forms
 p_cell add_fflechie(char* fflechie, char* type){
 
-    int type_int = conversion_type(type);
+    int type_int = conversion_type(type,1);//Encoding of the type
     
     if(type_int == -1) //exclude forbidden typed p_cell
         return NULL;
 
     else{
-        //printf("%s : subtype : %s\n", fflechie, subtype);
         //create cell for fflechie
         p_cell my_cell = (p_cell)malloc(sizeof(t_cell));
 
@@ -154,11 +89,10 @@ p_cell add_fflechie(char* fflechie, char* type){
     }
 }
 
-
-
+//Add a word to the tree with its base form and its contracted forms
 void add_word(t_ht_list_node *the_root, char *fbase, char *fflechie, char *types)
 {
-    p_node my_node = add_fbase(the_root, NULL, fbase, 0);
+    p_node my_node = add_fbase(the_root, NULL, fbase, 0);//We first add the base form
     if(types != NULL){
         //Add the forme flechie to the list of the last node
         char *type, *token = strtok(types, ":");
@@ -166,9 +100,9 @@ void add_word(t_ht_list_node *the_root, char *fbase, char *fflechie, char *types
             type = token;
             token = strtok(NULL, ":");
             
-            p_cell my_cell = add_fflechie(fflechie, type);
+            p_cell my_cell = add_fflechie(fflechie, type);//Create the cell of the contracted forms 
             
-            if(my_cell!=NULL){
+            if(my_cell!=NULL){//And connect that cell to the head of the list of contracted forms of the last node of the fbase
 
                 if(my_node->fflechies.head == NULL){ // checks if node has no fflechies yet
                     my_node->fflechies.head = my_cell; 
@@ -184,7 +118,7 @@ void add_word(t_ht_list_node *the_root, char *fbase, char *fflechie, char *types
     }
 }
 
-
+//Initialize an empty tree with all its fields
 t_tree create_empty_tree()
 {
     t_tree mytree;
@@ -195,9 +129,9 @@ t_tree create_empty_tree()
 
 }
 
+//Calls all functions necessary to fully extract the dictionary into a tree
 t_tree* fill_trees()
 {   
-
     //Creation of the array of trees
     t_tree* trees = malloc(CATEGORY_SIZE*sizeof(t_tree));
     
@@ -225,28 +159,25 @@ t_tree* fill_trees()
                 add_word(&(trees[i].roots), f_base, f_flechie, type);
 
     }
-    
-
     fclose(dictionary);
-
-    return trees;
+    return trees;//We return the array of trees to be able to use them everywhere
 }
 
-
+//Developper-destined function to display all words in the tree
 void print_tree_paths(t_ht_list_node roots)
 {
     char* path = malloc(roots.size*sizeof(char));
     p_node tmp = roots.head;
-    for(int i = 0 ; i < roots.size ; i++){
+    for(int i = 0 ; i < roots.size ; i++){//For each letter of the root
         printf("+---+\n| %c |\n+---+  ", tmp->letter);
-        print_node_paths(tmp, path, 0);
+        print_node_paths(tmp, path, 0);//Print all paths of the subtree
         tmp = tmp->next;
         printf("\n\n\n [ENTER] \n\n\n");
         getchar();
     }
 }
 
-
+//Prints all the paths of a node
 void print_node_paths(p_node node, char path[], int pathLen)
 {
   if (node==NULL)
@@ -274,7 +205,6 @@ void print_node_paths(p_node node, char path[], int pathLen)
     }
     printf("\n\n");
     */
-    
   }
   
   else
@@ -289,99 +219,113 @@ void print_node_paths(p_node node, char path[], int pathLen)
   }
 }
 
-
-
-void search_fbase(t_ht_list_node roots, char *fbase, int index)
+//Search a if a word exists in the tree from its base form
+int search_fbase(t_ht_list_node roots, char *fbase, int index)
 {
-    p_node tmp = roots.head;
+    p_node tmp = roots.head;//The variable that will go through the list of letters for each layer
     int i = 0;
-    while(tmp != NULL && i < roots.size){
-        if(tmp->letter == fbase[index]){
+    while(tmp != NULL && i < roots.size){//We loop through the list of letters of the layer
+        if(tmp->letter == fbase[index]){//If we find the letter we are looking for
             
-            if(index == strlen(fbase)-1)
+            if(index == strlen(fbase)-1)//If we are at the end of the word
             {
-                printf("\nThe word %s has been found.\n", fbase);
-                print_fflechies(tmp);
-                return;
+                printf("\nThe word '%s' has been found.\n", fbase);
+                print_fflechies(tmp);//Print all of its contracted forms and its type
+                return 1;//Return true, the word is found
             }
             else
-                return search_fbase(tmp->next_letters, fbase, index+1);
+                return search_fbase(tmp->next_letters, fbase, index+1);//Recursive call while we're not at the end of the word
         }
         tmp = tmp->next;
         i++;
     }
-    printf("\nThe word %s has not been found.\n", fbase);
-    return;
+    return 0;//If we reach this point, the word is not found so return false
 }
 
+//Search a if a word exists in the tree from its contracted form
+void search_fflechie(t_ht_list_node roots, char *fflechie, int*found, char *fbase_array)
+{
+    p_node tmp = roots.head;//The variable that will go through the list of letters for each layer
+    int i = 0;
+    while(tmp != NULL && i < roots.size && !*found)//We loop while we're not done with the layer and we haven't found the word
+    {
+        if(tmp->fflechies.head != NULL)//Check whenever a word has at least one contracted form
+        {
+            p_cell tmp_cell = tmp->fflechies.head;
+            while(tmp_cell != NULL)//Run through each of its contracted forms to check if it's here
+            {
+                if(!strcmp(tmp_cell->forme_flechie, fflechie))
+                {
+                    printf("\nThe word '%s' has been found.\n", fflechie);
+                    *found = 1;//Change found to true
+                    return;
+                }
+                tmp_cell = tmp_cell->next;
+            }
+        }
+        //strcat(fbase_array, tmp->letter);
+        search_fflechie(tmp->next_letters, fflechie, found, fbase_array);//Recursive call to the next layer
+        tmp = tmp->next;
+        i++;
+    }
+}
 
+//Allows to pick randomly a base form from the tree
 void extract_random_fbase(t_tree mytree)
 {
-    int tree_roots_size = 0;
-    p_node tmp = mytree.roots.head;
-    while(tmp != NULL)//Count the number of letter in the root of the tree
-    {
-        tree_roots_size ++;
-        tmp = tmp->next;
-    }
-
+    //We get the last node of the word we're randomly extracting, the parameter 1 is to indicate that we print the word
     p_node last_node_fbase = random_path(mytree.roots,mytree.roots.head,1);
     printf("' is a base form. "); 
-    print_fflechies(last_node_fbase);
+    print_fflechies(last_node_fbase);//Print all of its contracted forms and its type
 }
-
 
 //Used to print all fflechies of a fbase
 void print_fflechies(p_node leaf)
 {
-    if(leaf->fflechies.head == NULL) //Case of the adverb tree
-        printf("Since it is an adverb, it doesn't have any contracted forms.\n");
-    else
+
+    if(leaf->fflechies.size == 1)//If there is only one fflechie, we use the singular in the sentence
+        printf("Its contracted form is :\n\t- '%s' which is of type %s.\n\n",leaf->fflechies.head->forme_flechie, conversion_string(leaf->fflechies.head->number_type, 1));
+    else 
     {
-        if(leaf->fflechies.size == 1)//If there is only one fflechie, we use the singular in the sentence
-            //Need to modify to put into words the number type -> need a new function
-            printf("Its contracted form is :\n\t- '%s' which is of number %d (temporary display).\n\n",leaf->fflechies.head->forme_flechie, leaf->fflechies.head->number_type);
-        else 
+        printf("Its contracted forms are :\n");
+        p_cell temp = leaf->fflechies.head;
+        while(temp != NULL)
         {
-            printf("Its contracted forms are :\n");
-            p_cell temp = leaf->fflechies.head;
-            while(temp != NULL)
-            {
-                printf("\t- '%s' which is of number %d (temporary display).\n",temp->forme_flechie,temp->number_type);
-                temp = temp->next;
-            }
-            printf("\n");
+            printf("\t- '%s' which is of type %s\n",temp->forme_flechie,conversion_string(temp->number_type, 1));
+            temp = temp->next;
         }
-    }   
+        printf("\n");
+
+    }
 }
 
-
-
+//Used to pick randomly a path in the tree
 p_node random_path(t_ht_list_node current_list, p_node current_node, int print_path)
 {
-    if(current_node->fflechies.head != NULL || current_list.head == NULL)
+    if(current_node->fflechies.head != NULL || current_list.head == NULL)//If we get to a leaf or if we find a p_node that has contracted forms
     {
         if(rand() % number_paths(current_node) == 0 || current_list.head == NULL){//1 chance out of the number of paths to stop the path 
-            return current_node;
+            return current_node;//And we return the last node of the word in that case
         }
     }        
     
-    int random = rand() % current_list.size;
+    //Main recursive body
+    int random = rand() % current_list.size;//Pick a random number between 0 and the number of letters in the current layer
     p_node temp = current_list.head;
-    for(int i = 0 ; i < random ; i++)
+    for(int i = 0 ; i < random ; i++)//We get to the random letter
         temp = temp->next;
-    if(print_path)
+    if(print_path)//Mode to print each letter as we go through the path
     {
         printf("%c",temp->letter);
-        return random_path(temp->next_letters,temp,1);
+        return random_path(temp->next_letters,temp,1);//Recursive call to the next layer, with display 
     }
-    return random_path(temp->next_letters,temp,0);            
+    return random_path(temp->next_letters,temp,0);//Recursive call to the next layer, without display        
 }
 
-
+//Used to get the number of paths from a node, which is usefull to have equal probability in random_path
 int number_paths(p_node current)
 {
-    if(current->next_letters.head == NULL)
+    if(current->next_letters.head == NULL)//Stop condition if we're at a leaf
         return 1;
     else
     {
@@ -392,9 +336,10 @@ int number_paths(p_node current)
             sum += number_paths(temp);
             temp = temp->next;
         }
-        return sum;
+        return sum;//Return the sum of all the paths from the current node
     }
 }
+
 
 char * generate_random_type(int mode){
 
@@ -424,20 +369,21 @@ char * generate_random_type(int mode){
     
 }
 
+
 void generate_modele1(t_tree * trees, int mode_fflechie)
 {
     if(mode_fflechie){
-
+ 
     char * noun_type = generate_random_type(0); // Example "Mas+SG"
-    char * sub_verb_type = (char*)malloc(5*sizeof(char)); 
+    char * sub_verb_type = (char*)malloc(5*sizeof(char));
     int founds = 0, cpt_noun =0, cpt_verb =0;
     while(cpt_noun < strlen(noun_type)){
-
+ 
         if (founds == 1){
             sub_verb_type[cpt_verb] = noun_type[cpt_noun];
             cpt_verb++;
         }
-
+ 
         if('+' == noun_type[cpt_noun]){
             founds++;
         }
@@ -446,22 +392,22 @@ void generate_modele1(t_tree * trees, int mode_fflechie)
         }
         cpt_noun++;
     }
-
+ 
     if(!strcmp(sub_verb_type, "InvPL")){
         strcpy(sub_verb_type, "SG");
     }
-    
-    int noun_type_1 = conversion_type(noun_type);
+   
+    int noun_type_1 = conversion_type(noun_type, 0);
     int adj_type = noun_type_1;
     strcat(sub_verb_type, "+P3");
-    int verb_type = conversion_type(sub_verb_type);
+    int verb_type = conversion_type(sub_verb_type, 0);
     //int verb_type = conversion_type(random_type);
-
+ 
     char * noun1_flechie = malloc(50*sizeof(char));
     char * adj_flechie = malloc(50*sizeof(char));
     char * verb_flechie = malloc(50*sizeof(char));
     char * noun2_flechie = malloc(50*sizeof(char));
-
+ 
     // Finding a noun that correcsponds to the type
     noun1_flechie = finding_fflechie_corresponding_to_type(trees[NOM], noun_type_1);
     // Finding an adjective that correcsponds to the type
@@ -471,22 +417,22 @@ void generate_modele1(t_tree * trees, int mode_fflechie)
     //Finding a random second noun
    
     p_node noun2 = random_path(trees[0].roots,trees[0].roots.head ,0);
-
+ 
     int i = rand() % (noun2->fflechies.size);
     p_cell temp = noun2->fflechies.head;
     for(int j = 0; j < i; j++)
         temp = temp->next;
-
+ 
     noun2_flechie = temp->forme_flechie;
     int noun_type_2 = temp->number_type; // Used for the determinant of the second noun
-
+ 
     char * determinant_noun1 = determinant_generator(noun_type_1);
     char * determinant_noun2 = determinant_generator(noun_type_2);
-
+ 
     printf("%s %s %s %s %s %s.", determinant_noun1, noun1_flechie, adj_flechie, verb_flechie, determinant_noun2, noun2_flechie);
-    
+   
     }
-
+ 
     else{
         random_path(trees[NOM].roots, trees[NOM].roots.head, 1);
         printf(" ");
@@ -496,29 +442,30 @@ void generate_modele1(t_tree * trees, int mode_fflechie)
         printf(" ");
         random_path(trees[NOM].roots, trees[NOM].roots.head, 1);
         printf(".\n");
-    
+   
     }
-    
+   
 }
 
+
 void generate_modele2(t_tree * trees, int mode_fflechie){
-
+ 
     if(mode_fflechie){
-
+ 
     char * noun_type = generate_random_type(0); // Example "Mas+SG"
     char * noun_type2 = generate_random_type(0); // Example "Fem+SG"
-
-    char * sub_verb_type = (char*)malloc(5*sizeof(char)); 
-
+ 
+    char * sub_verb_type = (char*)malloc(5*sizeof(char));
+ 
     //Getting the  verb (since it has to agree with the first noun, we need to do the following)
     int founds = 0, cpt_noun =0, cpt_verb =0;
     while(cpt_noun < strlen(noun_type)){
-
+ 
         if (founds == 1){// start adding to the verb_type_2 only when we found the first "+", because verb_type_2 should not store "Mas" or "Fem" from the noun_type
             sub_verb_type[cpt_verb] = noun_type[cpt_noun];
             cpt_verb++;
         }
-
+ 
         if('+' == noun_type[cpt_noun]){
             founds++;
         }
@@ -527,19 +474,19 @@ void generate_modele2(t_tree * trees, int mode_fflechie){
         }
         cpt_noun++;
     }
-
+ 
     if(!strcmp(sub_verb_type, "InvPL")){
         strcpy(sub_verb_type, "SG");
     }
-
+ 
     strcat(sub_verb_type, "+P3");// Example "SG+P3"
-    
+   
     //Declaration of the types
-    int noun_type_1 = conversion_type(noun_type);
-    int noun_type_2 = conversion_type(noun_type2);
+    int noun_type_1 = conversion_type(noun_type, 0);
+    int noun_type_2 = conversion_type(noun_type2, 0);
     int adj_type = noun_type_2;
-    int verb_type = conversion_type(sub_verb_type);
-
+    int verb_type = conversion_type(sub_verb_type, 0);
+ 
     //Declaration of the fflechies
     char * noun1_flechie = malloc(50*sizeof(char));
     char * verb1_flechie = malloc(50*sizeof(char));
@@ -549,8 +496,8 @@ void generate_modele2(t_tree * trees, int mode_fflechie){
     //Declaration of the determinants
     char * determinant_noun1 = determinant_generator(noun_type_1);
     char * determinant_noun2 = determinant_generator(noun_type_2);
-    
-
+   
+ 
     // Finding a noun that correcsponds to the type
     noun1_flechie = finding_fflechie_corresponding_to_type(trees[NOM], noun_type_1);
     // Finding a verb that correcsponds to the type
@@ -561,12 +508,12 @@ void generate_modele2(t_tree * trees, int mode_fflechie){
     noun2_flechie = finding_fflechie_corresponding_to_type(trees[NOM], noun_type_2);
     // Finding an adjective that correcsponds to the type
     adj_flechie = finding_fflechie_corresponding_to_type(trees[ADJ], adj_type);
-
+ 
     printf("%s %s qui %s %s %s %s %s.", determinant_noun1, noun1_flechie, verb1_flechie, verb2_flechie, determinant_noun2, noun2_flechie, adj_flechie);
-
-
+ 
+ 
     }
-
+ 
     else
     {
         random_path(trees[NOM].roots,trees[NOM].roots.head, 1);
@@ -580,31 +527,31 @@ void generate_modele2(t_tree * trees, int mode_fflechie){
         random_path(trees[ADJ].roots,trees[ADJ].roots.head, 1);
         printf(".\n");
     }
-
+ 
 }
 
 
 void generate_modele3(t_tree * trees, int mode_fflechie){
-
+ 
     //THE SENTENCE IS OF TYPE "pronom + verb + adverbe + et + determinat + noun + adjective + verb."
-
+ 
     if(mode_fflechie){
-    
+ 
     //Declarations
     char * verbal_tenses[6] = {"SPre", "IPre", "IImp"};
     char * pronom_S[5] = {"je", "tu", "il", "elle"};
     char * pronom_P[17] = {"nous", "vous", "ils", "elles"};
-
+ 
     char * pronom = malloc(10*sizeof(char));
-    char * verb_type_1 = malloc(20*sizeof(char)); 
-
+    char * verb_type_1 = malloc(20*sizeof(char));
+ 
     //Random integers for the random selection of the words
     int random_Pronom = rand() % 3;
     int random_SP = rand() % 2;
     int random_tense = rand() % 3;
-
+ 
     char * tense = {verbal_tenses[random_tense]}; //Random tense, tense is now either "SPre", "IPre", "IImp" or "Inf"
-
+ 
     if(random_SP){//if random_SP == 1, the pronoun is in plural
         strcpy(pronom, pronom_P[random_Pronom]);//pronom is now either "nous", "vous", "ils" or "elles"
         strcpy(verb_type_1, "PL+");
@@ -612,7 +559,7 @@ void generate_modele3(t_tree * trees, int mode_fflechie){
     else{
         strcpy(pronom, pronom_S[random_Pronom]);//pronom is now either "je", "tu", "il" or "elle"
         strcpy(verb_type_1, "SG+");
-        
+       
     }
     strcat(verb_type_1, "P");//verb_type_1 would now be "SG+P" for example (depending on the random values, it could be "PL+P" )
     random_Pronom++;
@@ -621,97 +568,102 @@ void generate_modele3(t_tree * trees, int mode_fflechie){
     strcat(verb_type_1, str);//verb_type_1 would now be "SG+P1" for example (also depending on the random values)
     strcat(verb_type_1, "+");
     strcat(verb_type_1, tense);//finally verb_type_1 would now be "SG+P1+SPre" for example (also depending on the random values)
-
+ 
+ 
+    char * noun_flechie = malloc(30*sizeof(char));
     //types
-    int verb_type = conversion_type(verb_type_1);
-    char * noun_type = generate_random_type(0); // Example "Mas+SG"
-    int noun_type_1 = conversion_type(noun_type);
-    int adj_type = conversion_type(noun_type);
-
+    int verb_type = conversion_type(verb_type_1, 1);
+    char * noun_type = generate_random_type(0); // Example "Fem+PL"
+    int noun_type_1 = conversion_type(noun_type, 1); //integer corresponding to "Mas+InvPL"
+    noun_flechie = finding_fflechie_corresponding_to_type(trees[NOM], noun_type_1);
+    noun_type_1 = conversion_type(noun_type, 0);
+    strcpy(noun_type, conversion_string(noun_type_1, 0));
+   
+ 
     // Declarations of the formes flechies
     char * verb1_flechie = malloc(30*sizeof(char));
     char * adverbe_flechie = malloc(30*sizeof(char));
-    char * noun_flechie = malloc(30*sizeof(char));
+   
     char * adj_flechie = malloc(30*sizeof(char));
     char * determinant_noun = malloc(7*sizeof(char));
     char * verb2_flechie = malloc(30*sizeof(char));
     char * verb_type_2 = malloc(5*sizeof(char));
-    
+   
     //Getting the first verb
     verb1_flechie = finding_fflechie_corresponding_to_type(trees[VER], verb_type);
-
+ 
     //Getting the first noun
-    noun_flechie = finding_fflechie_corresponding_to_type(trees[NOM], noun_type_1);
-
+   
+ 
     //Getting the determinant
     determinant_noun = determinant_generator(noun_type_1);
-
+ 
     //Getting the adjective
-    adj_flechie = finding_fflechie_corresponding_to_type(trees[ADJ], adj_type);
-
+    adj_flechie = finding_fflechie_corresponding_to_type(trees[ADJ], noun_type_1);
+ 
     //Getting the second verb (since it has to agree with the first noun, we need to do the following)
  
     int founds = 0, cpt_noun =0, cpt_verb =0;
     while(cpt_noun < strlen(noun_type)){
-
+ 
         if (founds == 1){// start adding to the verb_type_2 only when we found the first "+", because verb_type_2 should not store "Mas" or "Fem" from the noun_type
             verb_type_2[cpt_verb] = noun_type[cpt_noun];
             cpt_verb++;
         }
-
+ 
         if('+' == noun_type[cpt_noun]){
             founds++;
         }
-
+ 
         if(founds == 2){// stop when we fninsh adding the "SG" or "PL" to the verb_type_2
             break;
         }
         cpt_noun++;
     }
-
+ 
     if(!strcmp(verb_type_2, "InvPL")){
         strcpy(verb_type_2, "SG");
     }
-
+ 
     strcat(verb_type_2, "+P3+");//In our sentence, the second verb is always in the third person
     strcat(verb_type_2, tense);//The tense should be the same as the first verb, to make the sentence make more sense
-
-    int verb_type_2_int = conversion_type(verb_type_2);
-
+ 
+    int verb_type_2_int = conversion_type(verb_type_2, 0);
+ 
     verb2_flechie = finding_fflechie_corresponding_to_type(trees[VER], verb_type_2_int);
-    
+   
     //############## PRINTING THE SENTENCE####################
-
+ 
     //For the case when we have the verbs in the subjunctive mood (we implement a que or qu' in 2 places in the sentence)
-    
+   
     if(!strcmp(tense, "SPre")){
         if(!(strcmp(pronom, "il")) || !(strcmp(pronom, "ils")) || !(strcmp(pronom, "elle")) || !(strcmp(pronom, "elles")))
             printf("Qu'");
         else
             printf("Que ");
     }
-
+ 
     printf("%s %s ", pronom , verb1_flechie);
-
+ 
     //Printing the adverbe
     random_path(trees[ADV].roots, trees[ADV].roots.head, 1);
     //Printing the adverbe
-
+ 
     printf(" et ");
-
+ 
     if(!strcmp(tense, "SPre")){
         if(!(strcmp(determinant_noun, "un") || !(strcmp(determinant_noun, "une"))))
             printf("qu'");
         else
             printf("que ");
     }
-
+ 
     printf("%s %s %s %s.\n", determinant_noun, noun_flechie, adj_flechie, verb2_flechie);
-
+ 
     }
     else
     {
-        
+       
         random_path(trees[VER].roots, trees[VER].roots.head, 1);
         printf(" ");
         random_path(trees[ADV].roots, trees[ADV].roots.head, 1);
@@ -722,9 +674,9 @@ void generate_modele3(t_tree * trees, int mode_fflechie){
         printf(" ");
         random_path(trees[VER].roots, trees[VER].roots.head, 1);
         printf(".\n");
-
+ 
     }
-
+ 
 }
 
 
@@ -747,8 +699,8 @@ char * finding_fflechie_corresponding_to_type(t_tree my_tree, int type){
         }
     }
     return fflechie;
-
 }
+
 
 char * determinant_generator(int type){
 
@@ -797,14 +749,3 @@ int is_type_in( int desired_type, int full_type){
     return 1;
 }
 
-
-
-    
-
-    
-
-
- 
-
-
-    

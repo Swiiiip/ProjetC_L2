@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "functions.h"
 
 typedef enum{
-    NOM= 0,
+    NOM = 0,
     ADJ = 1,
     ADV = 2,
     VER = 3
@@ -73,12 +74,13 @@ void print_node_paths(p_node node, char path[], int pathLen);
 p_cell add_fflechie(char* fflechie, char* types);
 p_node add_fbase(t_ht_list_node * siblings, p_node my_node, char * f_base, int index);
 void add_word(t_ht_list_node * the_root, char *fbase, char *fflechie, char *type);
-void search_fbase(t_ht_list_node roots, char *fbase, int index);
+int search_fbase(t_ht_list_node roots, char *fbase, int index);
+void search_fflechie(t_ht_list_node roots, char *fflechie, int*, char *fbase_arrayt);
 void extract_random_fbase(t_tree);
 p_node random_path(t_ht_list_node, p_node, int);
+void add_word_if_not_found(t_ht_list_node roots, char *given, int is_fbase);
 
 //    USEFUL FUNCTIONS    //
-int conversion_type(char* type);
 p_node search_letter(t_ht_list_node mylist, char letter);
 void print_fflechies(p_node leaf);
 int number_paths(p_node current);
