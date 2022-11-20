@@ -62,87 +62,86 @@ int intVerify(int min, int max, char input[]){
     }
 }
 
-
 //Function to translate a type from the .txt file to an binary code 
 int conversion_type(char* type, int mode){
     int type_int = 0;
-   
+
+    if(type == NULL) // for fflechies with no type (ex: adverbs, prepositions)
+        return 0;
+
     char * temp = (char*)malloc((strlen(type)+1) * sizeof(char));
+    char* subtype = (char*)malloc(10 * sizeof(char)); // Examples : "Pre", "ImPre", "P1", "P2", "P3", "SG"
     strcpy(temp, type);
-    char* subtype, *token = strtok(temp, "+");
-   
+    char* token = strtok(temp, "+");
+
     while(token != NULL){
-        subtype = token;
+        strcpy(subtype,token);
+
         token = strtok(NULL, "+");
-           
-        // Binary table for type conversion :
+
+        // Binary table for type conversion : 
         // +--------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
         // |   10   |   9   |   8   |   7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
         // +--------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
         // |  Inf   | IImp  | IPre  | SPre  |  P1   |  P2   |  P3   |  PL   |  SG   |  Fem  |  Mas  |
         // +--------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
- 
+
         if(!strcmp(subtype, "InvGen")){
             if(mode == 0){
                 int random = rand() % 2;
+                
                 if(random)
                     type_int += 1;
                 else
                     type_int += 2;
-            }
-            else
-                type_int += 2 + 1;
-               
-           
+            
+            }else
+                type_int += 2 + 1; // Mas and Fem at the same time
         }
         else if(!strcmp(subtype, "Mas"))
             type_int += 1;
         else if(!strcmp(subtype, "Fem"))
             type_int += 2;
- 
+
         else if(!strcmp(subtype, "InvPL")){
-            if(mode == 0){
-                int random = rand() % 2;
+            if(mode ==0){
+                int random = rand () % 2;
+
                 if(random)
                     type_int += 4;
                 else
                     type_int += 8;
-            }
-            else
-                type_int += 4 + 8;
+
+            }else
+                type_int += 4 + 8; // SG and PL at the same time
         }
- 
         else if(!strcmp(subtype, "SG"))
             type_int += 4;
         else if(!strcmp(subtype, "PL"))
             type_int += 8;
- 
+
         else if(!strcmp(subtype, "P3"))
             type_int += 16;
         else if(!strcmp(subtype, "P2"))
             type_int += 32;
         else if(!strcmp(subtype, "P1"))
             type_int += 64;
- 
+
         else if(!strcmp(subtype, "SPre"))
             type_int += 128;
         else if(!strcmp(subtype, "IPre"))
             type_int += 256;
         else if(!strcmp(subtype, "IImp"))
             type_int += 512;
-        else if(!strcmp(subtype, "Inf")){
-            type_int += 1024;
-            break;
-        }
- 
+        else if(!strcmp(subtype, "Inf"))
+            return 1024;
         else{ // for errors, unknown types, or excluded types
-            type_int = -1;
-            //printf("%s : Unknown subtype : %s\n", fflechie, subtype);
-            break;
-        }
-   
+            token = strtok(NULL, "+");
+            return -1;
+        } 
+    
     }
- 
+
     return type_int;
 }
 
@@ -236,9 +235,10 @@ char *conversion_string(int type, int mode){
             strcat(type_string_sentence, Personne);
             strcat(type_string_sentence, "du ");
             strcat(type_string_sentence, SGPL);
-        }else {
-            strcat(type_string_sentence, "adverb.\0");
-           
+        }
+        if(type == 0)
+        {
+            strcpy(type_string_sentence, "adverb");
         }
         strcat(type_string_sentence, "\0");
  

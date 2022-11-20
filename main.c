@@ -11,7 +11,6 @@ int main()
     start = clock();
     t_tree * my_trees =  fill_trees();//Creation of all the trees of words that will be used in the rest of the program
     end = clock();
-    end = clock();
     printf("\n\n=============================================\n Time taken for tree generation : %f s\n=============================================\n\n", (double)(end - start) / CLOCKS_PER_SEC); 
     
     main_menu(my_trees);//Launch of the main menu

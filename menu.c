@@ -15,9 +15,9 @@ void main_menu(t_tree * my_trees)
            "1 - Generate a random french sentence\n"
            "2 - Obtain a random word from our dictionary\n"
            "3 - Check if a word of your choice is in our dictionary, and add it if it isn't\n"
-           "4 - Exit\n>>> ");
+           "0 - Exit\n>>> ");
     gets(user_input);
-    //choice = intVerify(0, 3, user_input);//This is used in every input to verify it
+    choice = intVerify(0, 3, user_input);//This is used in every input to verify it
     }while(choice == -1);
 
     switch (choice)

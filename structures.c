@@ -90,32 +90,37 @@ p_cell add_fflechie(char* fflechie, char* type){
 }
 
 //Add a word to the tree with its base form and its contracted forms
-void add_word(t_ht_list_node *the_root, char *fbase, char *fflechie, char *types)
-{
-    p_node my_node = add_fbase(the_root, NULL, fbase, 0);//We first add the base form
-    if(types != NULL){
-        //Add the forme flechie to the list of the last node
-        char *type, *token = strtok(types, ":");
-        while(token != NULL){
-            type = token;
-            token = strtok(NULL, ":");
-            
-            p_cell my_cell = add_fflechie(fflechie, type);//Create the cell of the contracted forms 
-            
-            if(my_cell!=NULL){//And connect that cell to the head of the list of contracted forms of the last node of the fbase
+void add_word(t_ht_list_node *the_root, char *fbase, char *fflechie, char *types){   
 
-                if(my_node->fflechies.head == NULL){ // checks if node has no fflechies yet
-                    my_node->fflechies.head = my_cell; 
-                    my_node->fflechies.tail = my_cell;
-                }
-                else{
-                    my_node->fflechies.tail->next = my_cell;
-                    my_node->fflechies.tail = my_cell;
-                }
-                my_node->fflechies.size ++;
+    char* type = strtok(types, ":"); //split types string into type
+
+    do{
+        p_cell my_cell = add_fflechie(fflechie, type); //Create the forme flechie
+
+        type = strtok(NULL, ":");
+
+        if(my_cell!=NULL){ //if the type is not forbidden, add the fflechie to the node
+            p_node my_node = add_fbase(the_root, NULL, fbase, 0); //create the node
+
+            if(my_node->fflechies.head == NULL){ // checks if node has no fflechies yet
+                my_node->fflechies.head = my_cell; 
+                my_node->fflechies.tail = my_cell;
             }
+            else{ // adds at the end of the fflechie list if there are already fflechies
+                my_node->fflechies.tail->next = my_cell;
+                my_node->fflechies.tail = my_cell;
+            }
+            my_node->fflechies.size ++;
+
+        }else { //if the type is forbidden
+            if(type!=NULL) // if there are more types to check
+                continue;
+            else // if there are none left to check
+                break;
         }
-    }
+   
+    }while(type != NULL); //while there are still types to check
+    
 }
 
 //Initialize an empty tree with all its fields
@@ -149,15 +154,14 @@ t_tree* fill_trees()
     dictionary = fopen("dictionnaire_non_accentue.txt","r");
 
     //The while returns each line one by one as a string, line 
-    while(fgets(line,110,dictionary)){   
-
+    while(fgets(line,110,dictionary))
+    {   
         split_line(line, &f_flechie, &f_base, &category, &type);
     
         //Now that we have each information of a line into the correct variables, we add it to the correct tree
         for(int i = 0 ; i < CATEGORY_SIZE ; i++)
             if (!strcmp(categories[i],category))//Looks if the category we have is among the $CATEGORY_SIZE we consider
                 add_word(&(trees[i].roots), f_base, f_flechie, type);
-
     }
     fclose(dictionary);
     return trees;//We return the array of trees to be able to use them everywhere
@@ -194,7 +198,6 @@ void print_node_paths(p_node node, char path[], int pathLen)
         printf("%c", path[i]);
     printf(" ");
     //COMMENT THIS PART IF YOU DON'T WANT TO SEE THE FORMES FLECHIES :
-
     /*
     p_cell tmp = node->fflechies.head;
     printf(" %d fflechies :\n", node->fflechies.size);
@@ -265,7 +268,7 @@ void search_fflechie(t_ht_list_node roots, char *fflechie, int*found)
             }
         }
         search_fflechie(tmp->next_letters, fflechie, found);//Recursive call to the next layer
-        
+
         tmp = tmp->next;
         i++;
     }
@@ -288,13 +291,13 @@ void print_fflechies(p_node leaf, int is_fflechie)
     if(!is_fflechie)
     {
         if(leaf->fflechies.size == 1)//If there is only one fflechie, we use the singular in the sentence
-            printf("Its contracted form is :\n\t- '%s' which is of type %s.\n\n",leaf->fflechies.head->forme_flechie, conversion_string(leaf->fflechies.head->number_type, 1));
+            printf("Its contracted form is :\n\t- '%s' which is %s.\n",leaf->fflechies.head->forme_flechie,temp->number_type==0?"an adverb":conversion_string(leaf->fflechies.head->number_type, 1));
         else 
         {
             printf("Its contracted forms are :\n");
             while(temp != NULL)
             {
-                printf("\t- '%s' which is of type %s\n",temp->forme_flechie,conversion_string(temp->number_type, 1));
+                printf("\t- '%s' which is %s.\n",temp->forme_flechie,temp->number_type==0?"an adverb":conversion_string(temp->number_type, 1));
                 temp = temp->next;
             }
             printf("\n");
@@ -304,11 +307,11 @@ void print_fflechies(p_node leaf, int is_fflechie)
     {
         printf("The full list of the contracted forms to which this one belongs is :\n");
         while(temp != NULL)
-            {
-                printf("\t- '%s' which is of type %s\n",temp->forme_flechie,conversion_string(temp->number_type, 1));
-                temp = temp->next;
-            }
-            printf("\n");
+        {
+            printf("\t- '%s' which is %s\n",temp->forme_flechie, temp->number_type==0?"an adverb":conversion_string(temp->number_type, 1));
+            temp = temp->next;
+        }
+        printf("\n");
     }
 }
 
